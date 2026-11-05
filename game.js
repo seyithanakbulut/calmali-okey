@@ -577,6 +577,7 @@ class Okey101 {
 
   // ---------- Çalma ----------
   // kind: 'deck'    -> desteden gizlice FAZLADAN bir taş çeker (taş sayısı bir fazla görünür).
+  //                    Çekme sırasında yapılırsa ortadan 2 taş alır: biri normal çekiş sayılır.
   //                    Fazla taşı fark ettirmeden dump() ile yanına (çöpüne) atmalıdır.
   //                    Elinde fazla taş durduğu sürece, attıktan sonra da CATCH_WINDOW_MS boyunca yakalanabilir.
   // kind: 'discard' -> elindeki bir taşı çöpteki herhangi bir taşla değiştirir (CATCH_WINDOW_MS boyunca yakalanabilir).
@@ -589,7 +590,10 @@ class Okey101 {
     const events = [];
 
     if (kind === 'deck') {
-      if (!this.deck.length) return fail('Deste boş');
+      // Çekme sırasındaysa: biri normal çekiş, biri çalıntı (ortadan 2 taş). Sonra direkt taş atar.
+      const asDraw = this.phase === 'draw';
+      if (this.deck.length < (asDraw ? 2 : 1)) return fail('Destede yeterli taş yok');
+      if (asDraw) { hand.push(this.deck.pop()); this.phase = 'discard'; }
       const got = this.deck.pop();
       hand.push(got);
       this.extra[seat]++;

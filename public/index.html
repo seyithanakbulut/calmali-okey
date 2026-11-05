@@ -182,7 +182,7 @@
   /* Istaka */
   .rack { margin: 0 auto; width: fit-content; max-width: 100%; padding: 10px 12px 8px; border-radius: 16px;
           background: linear-gradient(#cf965a, #a0652f); box-shadow: inset 0 2px 0 rgba(255,255,255,.35), 0 8px 18px rgba(0,0,0,.55); }
-  .rrow { display:grid; grid-template-columns: repeat(15, var(--tw)); gap: 3px; padding: 4px 2px 7px;
+  .rrow { display:grid; grid-template-columns: repeat(var(--cols, 15), var(--tw)); gap: 3px; padding: 4px 2px 7px;
           border-bottom: 7px solid #7d4a1f; border-radius: 0 0 4px 4px; margin-bottom: 6px; }
   .rrow:last-child { margin-bottom: 0; }
   .slot { width: var(--tw); height: calc(var(--tw) * 1.42); border-radius: 6px; background: rgba(60,30,5,.12); }
@@ -250,14 +250,63 @@
           font-size: 22px; color:#ccc; }
   #log { display:none; margin: 12px auto 0; max-width: 700px; font-size: 13px; opacity: .7; max-height: 90px; overflow:auto; text-align:center; }
 
-  @media (max-width: 700px) {
-    .felt { border-width: 7px; padding: 8px; gap: 4px; grid-template-columns: 64px 1fr 64px; }
-    .plate { padding: 6px; } .plate .who { font-size: 13px; } .avatar { width: 24px; height: 24px; }
-    .backs { display:none; }
-    .lt { display:none; }
-    .plate .btn.red { padding: 5px 10px; }
-    .meta { font-size: 11px; gap: 4px; }
-  }
+  /* ---------- Telefon (JS body'ye phone / port / land sınıfı ekler) ---------- */
+  body.phone .app { padding: 4px 6px; }
+  body.phone #game { gap: 5px; height: calc(100dvh - 8px); }
+  body.phone .felt { border-width: 6px; padding: 5px; gap: 3px; border-radius: 16px; grid-template-columns: 52px minmax(0, 1fr) 52px; }
+  body.phone .plate { padding: 4px 6px; gap: 2px; border-radius: 10px; max-width: 100%; }
+  body.phone .plate .who { font-size: 12px; gap: 4px; white-space: nowrap; }
+  body.phone .plate .nm { overflow: hidden; text-overflow: ellipsis; max-width: 92px; display:inline-block; vertical-align: bottom; }
+  body.phone .side .plate .nm { max-width: 44px; }
+  body.phone .avatar { display:none; }
+  body.phone .meta { font-size: 10px; gap: 3px; }
+  body.phone .badge { font-size: 10px; padding: 0 5px; }
+  body.phone .plate .btn.red { padding: 3px 8px; font-size: 12px; box-shadow: 0 2px 0 #9e3518; }
+  body.phone .lt, body.phone .lt2 { display:none; }
+  body.phone .mystats { gap: 4px; } body.phone .stat { font-size: 11px; padding: 1px 7px; }
+  body.phone .pile { gap: 2px; } body.phone .pile .lbl { display:none; }
+  body.phone .pile .zoom { font-size: 10px; padding: 1px 6px; }
+  body.phone .pile .slotbox { width: calc(var(--tw) * 1.05); height: calc(var(--tw) * 1.5); border-radius: 6px; }
+  body.phone .pile .slotbox .tile { font-size: calc(var(--tw) * .48); }
+  body.phone #center { gap: 5px; padding-top: 2px; }
+  body.phone .mid { flex-wrap: wrap; justify-content:center; gap: 8px; }
+  body.phone .info { align-items:center; width: 100%; max-width: 100%; gap: 4px; }
+  body.phone .banner { font-size: 12px; padding: 5px 10px; text-align:center; border-radius: 10px; }
+  body.phone .okeyinfo { font-size: 11px; padding: 2px 8px; }
+  body.phone .ind { font-size: 10px; } body.phone .ind .tile { font-size: calc(var(--tw) * .48); }
+  body.phone .tsets { gap: 5px; padding: 2px; }
+  body.phone .obox { padding: 4px 5px 5px; border-radius: 8px; }
+  body.phone .owner { font-size: 11px; margin-bottom: 3px; }
+  body.phone .osets { gap: 3px; } body.phone .tile.ts { font-size: calc(var(--tw) * .4); }
+  body.phone .controls { gap: 4px; }
+  body.phone .group { padding: 3px; gap: 3px; }
+  body.phone .group .t { display:none; }
+  body.phone .btn.sm { padding: 6px 9px; font-size: 12px; }
+  body.phone .rack { padding: 5px 5px 3px; border-radius: 12px; }
+  body.phone .rrow { gap: 2px; padding: 3px 1px 5px; border-bottom-width: 5px; margin-bottom: 3px; }
+  body.phone .slot { border-radius: 4px; }
+  body.phone .rulesbtn, body.phone .chatbtn { padding: 5px 10px; font-size: 13px; }
+  body.phone .toast { font-size: 12px; padding: 6px 12px; }
+  body.phone .toast.big { font-size: 14px; padding: 8px 14px; }
+  body.phone #alarm .box { padding: 18px 20px; }
+  /* Dikey: ıstaka 3x10, düğmeler masanın üstünde */
+  body.phone.port { --tw: min(38px, calc((100vw - 56px) / 10)); }
+  body.phone.port .felt { margin-top: 34px; }
+  body.phone.port .rulesbtn { top: 4px; right: 8px; }
+  body.phone.port .chatbtn { top: 4px; left: 8px; bottom: auto; }
+  body.phone.port .gchat, body.phone.port .chatpop { top: 42px; bottom: auto; left: 8px; }
+  /* Yatay: her şey sıkı, düğmeler ıstakanın yanlarında */
+  body.phone.land { --tw: min(32px, calc((100vw - 150px) / 15), calc((100dvh - 150px) / 3.3)); }
+  body.phone.land .felt { grid-template-columns: 110px minmax(0, 1fr) 110px; }
+  body.phone.land .plate { flex-direction: row; flex-wrap: wrap; justify-content:center; padding: 3px 8px; gap: 2px 6px; }
+  body.phone.land .side .plate { flex-direction: column; }
+  body.phone.land .side .plate .nm { max-width: 90px; }
+  body.phone.land .mid { flex-wrap: nowrap; }
+  body.phone.land .info { width: auto; }
+  body.phone.land .rulesbtn { top: auto; bottom: 8px; right: 8px; }
+  body.phone.land .chatbtn { bottom: 8px; left: 8px; }
+  body.phone.land .gchat { bottom: 48px; height: min(300px, 70dvh); }
+  body.phone.land .chatpop { bottom: 48px; }
 </style>
 </head>
 <body>
@@ -322,7 +371,7 @@
 
   <!-- Oyun -->
   <div class="hidden" id="game">
-    <button class="rulesbtn" data-act="rules" title="Kurallar">📖 Kurallar</button>
+    <button class="rulesbtn" data-act="rules" title="Kurallar">📖<span class="lt2"> Kurallar</span></button>
     <div class="felt" id="felt">
       <div class="cell" id="c-tl"></div>
       <div class="cell" id="p-top"></div>
@@ -348,7 +397,7 @@
       </div>
       <div class="group" id="stealGroup">
         <span class="t">🕵️ Çal</span>
-        <button class="btn sm red" data-act="stealDeck">Desteden fazladan çek</button>
+        <button class="btn sm red" data-act="stealDeck" id="stealDeckBtn">Desteden fazladan çek</button>
         <button class="btn sm red hidden" data-act="dump" id="dumpBtn">🤫 Seçili taşı yana at</button>
         <button class="btn sm red" data-act="stealPile" id="stealPileBtn">Çöpteki taşla</button>
         <span class="t" id="stealsLeft"></span>
@@ -360,7 +409,7 @@
   </div>
 </div>
 
-<button class="chatbtn hidden" id="chatBtn" data-act="toggleChat">💬 Sohbet <span class="unread hidden" id="unread">0</span></button>
+<button class="chatbtn hidden" id="chatBtn" data-act="toggleChat">💬<span class="lt2"> Sohbet</span> <span class="unread hidden" id="unread">0</span></button>
 <div class="gchat hidden" id="gchat">
   <div class="gchead"><b>💬 Sohbet</b><button class="btn sm ghost" data-act="toggleChat">✕</button></div>
   <div class="chatlog" id="gchatLog"></div>
@@ -382,7 +431,23 @@ let CFG = null;
 let modalKind = null;
 let accuseCool = 0; // 'result' | 'rules' | 'cifte'
 fetch('/config').then(r => r.json()).then(c => { CFG = c; }).catch(() => {});
-const ROWS = 2, COLS = 15;
+let ROWS = 2, COLS = 15;   // telefonda dikey: 3 x 10 (yine 30 yuva)
+function applyMode() {
+  const w = innerWidth, h = innerHeight;
+  const phone = w < 720 || h < 500;
+  const port = phone && h >= w;
+  document.body.classList.toggle('phone', phone);
+  document.body.classList.toggle('port', port);
+  document.body.classList.toggle('land', phone && !port);
+  const rows = port ? 3 : 2, cols = port ? 10 : 15;
+  document.body.style.setProperty('--cols', cols);
+  if (rows !== ROWS) {
+    ROWS = rows; COLS = cols;
+    if (typeof S !== 'undefined' && S && S.handActive) { if (!autoMode) autoMode = 'seri'; arrange(); }
+    else if (typeof render === 'function' && typeof S !== 'undefined') render();
+  }
+}
+addEventListener('resize', () => { clearTimeout(applyMode.t); applyMode.t = setTimeout(applyMode, 120); });
 
 // Reklam ayarları (Flutter + AdMob tarafında da aynı mantık)
 const AD = { interstitialEveryHands: 2, interstitialMinGapMs: 90000, skipFirstHands: 2 };
@@ -925,6 +990,7 @@ function renderPop() {
 }
 
 // ---------- Socket ----------
+applyMode();
 socket.on('state', (st) => {
   room = st.room; you = st.you; S = st.game;
   if (S && S.handActive && S.handNo !== lastHandNo) {
@@ -993,7 +1059,7 @@ function plateHTML(seat, pos) {
     mine = `<div class="mystats"><span class="stat ${seriOk ? 'ok' : ''}">Seri ${sum.total}/${S.openMin}</span><span class="stat ${ciftOk ? 'ok' : ''}">Çift ${sum.cift.length}/${S.openMinPairs}</span></div>`;
   }
   return `<div class="plate ${turn ? 'turn' : ''} ${p && !p.online ? 'offline' : ''}">${mine}
-    <div class="who"><div class="avatar">${esc((p ? p.name : '?')[0].toUpperCase())}</div>${esc(nameOf(seat))}${seat === you ? ' (sen)' : ''}${turn ? ' ⏳' : ''}</div>
+    <div class="who"><div class="avatar">${esc((p ? p.name : '?')[0].toUpperCase())}</div><span class="nm">${esc(nameOf(seat))}</span>${seat === you ? '<span class="lt"> (sen)</span>' : ''}${turn ? ' ⏳' : ''}</div>
     <div class="meta"><span>${S.scores[seat]} puan</span>${extra}${op}</div>
     ${backs}${accuse}</div>`;
 }
@@ -1102,6 +1168,7 @@ function render() {
   $('dumpBtn').classList.toggle('hidden', !S.myExtra);
   $('stealGroup').classList.toggle('hidden', !S.opts.steal);
   $('dumpBtn').textContent = `🤫 Seçili taşı yana at (${S.myExtra} fazla)`;
+  $('stealDeckBtn').textContent = myTurn() && S.phase === 'draw' ? '🤫 Ortadan 2 çek' : '🤫 Fazladan 1 çek';
   $('stealPileBtn').textContent = selPile ? 'Seçili çöp taşıyla' : 'Çöpteki taşla';
   $('stealsLeft').textContent = `${S.stealsLeft} hak`;
 }
@@ -1180,7 +1247,7 @@ function rulesHTML() {
     <h3 id="r-calma">🕵️ Taş çalma</h3>
     <ul>
       <li>Sadece <b>kendi sırandayken</b>, bir elde en fazla <b>${v('STEAL_LIMIT', 2)} kez</b> çalabilirsin.</li>
-      <li><b>Desteden fazladan çek:</b> desteden gizlice bir taş daha alırsın. Elindeki <b>taş sayısı bir fazla</b> görünür (plakada yazar), diğerlerinde deste %${Math.round(v('DECK_HINT_CHANCE', .6) * 100)} ihtimalle bir an <b>yanıp söner</b>.
+      <li><b>🤫 Ortadan 2 çek:</b> sıran gelince desteden normal taşınla birlikte gizlice bir taş daha alırsın, sonra direkt taşını atarsın. (Çektikten sonra basarsan sadece 1 fazladan çeker.) Elindeki <b>taş sayısı bir fazla</b> görünür (plakada yazar), diğerlerinde deste %${Math.round(v('DECK_HINT_CHANCE', .6) * 100)} ihtimalle bir an <b>yanıp söner</b>.
         <ul>
           <li>Fazla taşı fark ettirmeden <b>yanına atmalısın</b>: istemediğin bir taşa tıkla, <b>🤫 Seçili taşı yana at</b>'a bas. Taş kendi çöpüne düşer. Bunu sıranı beklemeden, istediğin an yapabilirsin.</li>
           <li>Fazla taş <b>elinde durduğu sürece</b> yakalanabilirsin. Yana attıktan sonra da <b>${Math.round(v('CATCH_WINDOW_MS', 6000) / 1000)} saniye</b> risk devam eder.</li>
@@ -1208,7 +1275,7 @@ function rulesHTML() {
 }
 function stolen(kind) {
   selId = null;
-  if (kind === 'deck') toast('🤫 Fazladan taş aldın! Fark edilmeden bir taşı "yana at"', 'big');
+  if (kind === 'deck') toast('🤫 Fazladan taş aldın! Taşını at, fazlayı da fark ettirmeden "yana at"', 'big');
   else toast(`🤫 Çaldın! ${CFG ? CFG.CATCH_WINDOW_MS / 1000 : 6} saniye yakalanmazsan kurtuldun`);
 }
 
