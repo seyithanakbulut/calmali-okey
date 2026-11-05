@@ -238,9 +238,9 @@ io.on('connection', (socket) => {
   });
 
   // Perleri açmadan önce toplamı görmek için (hiçbir şey değiştirmez)
-  socket.on('check', ({ sets } = {}, cb = () => {}) => {
+  socket.on('check', ({ sets, down } = {}, cb = () => {}) => {
     if (!room || !me || !room.game || !room.game.handActive) return cb({ error: 'Oyun yok' });
-    const c = room.game.checkSets(me.seat, sets);
+    const c = room.game.checkSets(me.seat, sets, down);
     if (!c.ok) return cb({ error: c.error });
     cb({ ok: true, total: c.total, kind: c.kind, values: c.result.map((r) => r.value) });
   });
@@ -256,8 +256,9 @@ io.on('connection', (socket) => {
       case 'cifte': r = g.declareCifte(s); break;
       case 'untake': r = g.untake(s); break;
       case 'dump': r = g.dump(s, a.tileId); break;
-      case 'open': r = g.open(s, a.sets); break;
-      case 'attach': r = g.attach(s, a.tileId, a.setId); break;
+      case 'open': r = g.open(s, a.sets, a.down); break;
+      case 'attach': r = g.attach(s, a.tileId, a.setId, a.down); break;
+      case 'challengeDown': r = g.challengeDown(s, a.setId, a.tileId); break;
       case 'swapJoker': r = g.swapJoker(s, a.tileId, a.setId); break;
       case 'discard': r = g.discard(s, a.tileId); break;
       case 'steal': r = g.steal(s, a); break;

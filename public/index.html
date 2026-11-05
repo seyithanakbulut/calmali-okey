@@ -4,309 +4,334 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Çalmalı 101</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --tw: clamp(22px, min(calc((100vw - 110px) / 15), calc((100dvh - 470px) / 2.9)), 50px);
-    --red:#d63031; --yellow:#e1a100; --blue:#1e6fd9; --black:#1e1e1e;
-    --gold:#ffd166;
+    --tw: clamp(22px, min(calc((100vw - 110px) / 15), calc((100dvh - 430px) / 2.9)), 50px);
+    --red:#d1342f; --yellow:#d99a00; --blue:#1f66d1; --black:#1c1c1c;
+    --bg:#0b1220; --bg2:#0f1a2c; --panel:#121d31; --panel2:#17243b; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+    --text:#e8edf5; --muted:#93a1b5; --accent:#e9b949; --accent2:#f3cd6b; --danger:#d9534f; --ok:#2fbf71; --info:#3b82f6;
+    --felt1:#1f7a4d; --felt2:#155c39; --felt3:#0f4429; --frame:#2a1d14;
+    --gold: var(--accent);
   }
   * { box-sizing: border-box; }
   html, body { margin:0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; color:#fff;
-         background: radial-gradient(ellipse at top, #1b3a2a, #0b1d13 70%); min-height:100vh; }
-  button { font: inherit; border:0; cursor:pointer; }
-  .app { max-width: 1180px; margin: 0 auto; padding: 8px 12px; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased;
+         background: radial-gradient(1200px 600px at 50% -10%, #16243d 0%, var(--bg) 60%); min-height:100vh; }
+  button { font: inherit; border:0; cursor:pointer; color: inherit; }
+  input { font: inherit; }
+  .app { max-width: 1240px; margin: 0 auto; padding: 8px 14px; }
   .hidden { display:none !important; }
+  .muted { color: var(--muted); font-size: 13px; }
 
-  /* ---------- Lobi ---------- */
-  .lobby { min-height: 90vh; display:flex; align-items:center; justify-content:center; }
-  .lobby2 { min-height: 96vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 16px; padding: 10px 0; }
-  .ltitle { text-align:center; }
-  .ltitle h1 { margin: 0; font-size: clamp(30px, 5vw, 44px); }
-  .ltitle p { margin: 4px 0 12px; opacity: .85; }
-  .namerow { display:flex; gap: 8px; justify-content:center; }
-  .namerow input { padding: 12px 14px; border-radius: 12px; border: 0; font: inherit; width: min(280px, 60vw); }
-  .lgrid { display:grid; grid-template-columns: repeat(2, minmax(0, 420px)); gap: 16px; width: 100%; justify-content:center; }
-  .lgrid .card { width: 100%; text-align:left; padding: 20px; }
-  .lgrid h2 { margin: 0 0 8px; font-size: 20px; }
-  .rhead2 { display:flex; justify-content: space-between; align-items: baseline; }
-  .muted { opacity: .7; font-size: 13px; }
-  .roomlist { display:flex; flex-direction:column; gap: 8px; max-height: 300px; overflow-y:auto; min-height: 120px; }
-  .roomitem { display:flex; align-items:center; gap: 10px; background: rgba(0,0,0,.22); border-radius: 12px; padding: 10px 12px; }
-  .roomitem .ri { flex: 1; min-width: 0; }
-  .roomitem .rn { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .chips { display:flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; justify-content:center; }
-  .roomitem .chips { justify-content:flex-start; }
-  .chip { font-size: 11px; background: rgba(255,255,255,.14); padding: 2px 8px; border-radius: 999px; }
-  .chip.steal { background: #b3261e; } .chip.honest { background: #2e7dd7; }
-  .empty { opacity: .65; text-align:center; padding: 28px 0; font-size: 14px; }
-  .chatcard { display:flex; flex-direction:column; min-height: 360px; }
-  .chatlog { flex: 1; overflow-y: auto; background: rgba(0,0,0,.2); border-radius: 12px; padding: 8px 10px; font-size: 14px;
-             display:flex; flex-direction:column; gap: 4px; min-height: 0; }
-  .chatlog .m b { color: var(--gold); }
-  .chatlog .m.me b { color: #8fe3a7; }
-  .chatlog .m.sys { opacity: .6; font-style: italic; font-size: 13px; }
-  .chatform { display:flex; gap: 6px; margin-top: 8px; }
-  .chatform input { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 999px; border: 0; font: inherit; }
-  .chatbtn { position: fixed; left: 16px; bottom: 16px; z-index: 31; background: rgba(0,0,0,.6); color: #fff; padding: 9px 14px;
-             border-radius: 999px; font-weight: 700; border: 1px solid rgba(255,255,255,.2); }
-  .unread { background: #e4572e; border-radius: 999px; padding: 0 7px; margin-left: 4px; font-size: 12px; }
-  .gchat { position: fixed; left: 16px; bottom: 64px; z-index: 32; width: min(340px, calc(100vw - 32px)); height: min(380px, 60vh);
-           background: #153d27; border: 2px solid #7a4a22; border-radius: 16px; padding: 10px; display:flex; flex-direction:column;
-           box-shadow: 0 10px 30px rgba(0,0,0,.6); }
-  .gchead { display:flex; justify-content: space-between; align-items:center; margin-bottom: 6px; }
-  .chatpop { position: fixed; left: 16px; bottom: 64px; z-index: 31; max-width: min(320px, 80vw); background: rgba(10,25,16,.92);
-             border-radius: 14px; padding: 8px 12px; font-size: 14px; animation: tin .25s ease; pointer-events:none; }
-  .chatpop b { color: var(--gold); }
-  @media (max-width: 820px) { .lgrid { grid-template-columns: minmax(0, 1fr); } }
-  .card { background: linear-gradient(#24734a, #175233); border: 8px solid #7a4a22; border-radius: 22px;
-          padding: 28px 26px; width: min(420px, 100%); box-shadow: 0 14px 40px rgba(0,0,0,.5); text-align:center; }
-  .card h1 { margin: 0 0 4px; font-size: 32px; letter-spacing: .5px; }
-  .card p { margin: 0 0 18px; opacity: .85; }
-  .card input { width:100%; padding: 12px 14px; border-radius: 12px; border: 0; font: inherit; margin-bottom: 10px; }
-  .btn { padding: 10px 16px; border-radius: 999px; font-weight: 700; background: var(--gold); color:#2a1c05;
-         box-shadow: 0 3px 0 #b8871d; transition: transform .1s, opacity .2s; }
-  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b8871d; }
-  .btn.ghost { background: rgba(255,255,255,.14); color:#fff; box-shadow: none; }
-  .btn.red { background: #e4572e; color:#fff; box-shadow: 0 3px 0 #9e3518; }
-  .btn.sm { padding: 6px 12px; font-size: 14px; }
-  .btn:disabled { opacity: .4; cursor: default; }
+  /* ---------- Düğmeler ---------- */
+  .btn { padding: 9px 16px; border-radius: 10px; font-weight: 600; background: var(--accent); color: #1d1503;
+         border: 1px solid rgba(0,0,0,.15); transition: filter .15s, transform .08s, opacity .2s; white-space: nowrap; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost { background: rgba(255,255,255,.05); color: var(--text); border: 1px solid var(--line2); }
+  .btn.ghost:hover { background: rgba(255,255,255,.1); }
+  .btn.red { background: var(--danger); color: #fff; }
+  .btn.blue { background: var(--info); color: #fff; }
+  .btn.sm { padding: 7px 12px; font-size: 13px; border-radius: 9px; }
+  .btn.xs { padding: 4px 9px; font-size: 12px; border-radius: 8px; }
+  .btn.on { background: var(--accent); color: #1d1503; border-color: transparent; }
+  .btn:disabled { opacity: .38; cursor: default; filter: none; }
+  .btn.cool { opacity: .45; pointer-events: none; }
   .wide { width: 100%; }
-  .or { margin: 12px 0; opacity: .6; font-size: 14px; }
-  .joinrow { display:flex; gap:8px; } .joinrow input { margin:0; flex:1; width:auto; min-width:0; } .joinrow .btn { flex:0 0 auto; }
-  .plist { text-align:left; background: rgba(0,0,0,.18); border-radius: 12px; padding: 10px 14px; margin: 10px 0 16px; }
-  .plist div { padding: 4px 0; }
-  .code { font-size: 34px; font-weight: 800; letter-spacing: 6px; color: var(--gold); }
 
-  /* ---------- Masa ---------- */
+  /* ---------- Kart, lobi ---------- */
+  .card { background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: 16px;
+          padding: 22px; width: min(420px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,.45); text-align:center; }
+  .card h1 { margin: 0 0 4px; font-size: 30px; }
+  .card h2 { margin: 0 0 10px; font-size: 18px; font-weight: 700; }
+  .card p { margin: 0 0 16px; color: var(--muted); }
+  .card input { width:100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line2); background: #0c1526; color: var(--text); margin-bottom: 10px; }
+  .card input::placeholder, .namerow input::placeholder, .chatform input::placeholder { color: #6b7a90; }
+  .lobby2 { min-height: 96vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 18px; padding: 10px 0; }
+  .ltitle { text-align:center; }
+  .ltitle h1 { margin: 0; font-size: clamp(28px, 4.5vw, 40px); font-weight: 800; letter-spacing: -.5px; }
+  .ltitle h1 span { color: var(--accent); }
+  .ltitle p { margin: 6px 0 14px; color: var(--muted); }
+  .namerow { display:flex; gap: 8px; justify-content:center; }
+  .namerow input { padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line2); background: #0c1526; color: var(--text); width: min(280px, 60vw); }
+  .lgrid { display:grid; grid-template-columns: repeat(2, minmax(0, 430px)); gap: 16px; width: 100%; justify-content:center; }
+  .lgrid .card { width: 100%; text-align:left; padding: 20px; }
+  .rhead2 { display:flex; justify-content: space-between; align-items: baseline; }
+  .roomlist { display:flex; flex-direction:column; gap: 8px; max-height: 310px; overflow-y:auto; min-height: 130px; }
+  .roomitem { display:flex; align-items:center; gap: 10px; background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .roomitem .ri { flex: 1; min-width: 0; }
+  .roomitem .rn { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chips { display:flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; justify-content:center; }
+  .roomitem .chips { justify-content:flex-start; }
+  .chip { font-size: 11px; font-weight: 500; background: rgba(255,255,255,.07); border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; color: #c9d3e1; }
+  .chip.steal { background: rgba(217,83,79,.18); border-color: rgba(217,83,79,.4); color: #ffb3b0; }
+  .chip.honest { background: rgba(59,130,246,.18); border-color: rgba(59,130,246,.4); color: #b8d2ff; }
+  .empty { color: var(--muted); text-align:center; padding: 30px 0; font-size: 14px; }
+  .seg { display:flex; flex-wrap: nowrap; background: #0c1526; border: 1px solid var(--line); border-radius: 10px; padding: 3px; margin-bottom: 10px; }
+  .seg button { flex: 1; padding: 7px 6px; border-radius: 8px; background: transparent; font-weight: 600; font-size: 13px; color: var(--muted); }
+  .seg button.on { background: var(--accent); color: #1d1503; }
+  .segl { font-size: 12px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); text-align:left; margin: 8px 0 5px; }
+  .or { margin: 12px 0; color: var(--muted); font-size: 13px; }
+  .joinrow { display:flex; gap:8px; } .joinrow input { margin:0; flex:1; width:auto; min-width:0; } .joinrow .btn { flex:0 0 auto; }
+  .plist { text-align:left; background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; margin: 12px 0 16px; }
+  .plist div { padding: 5px 0; }
+  .code { font-size: 34px; font-weight: 800; letter-spacing: 6px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .chatcard { display:flex; flex-direction:column; min-height: 380px; }
+  .chatlog { flex: 1; overflow-y: auto; background: #0c1526; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; font-size: 14px;
+             display:flex; flex-direction:column; gap: 4px; min-height: 0; text-align:left; }
+  .chatlog .m b { color: var(--accent); font-weight: 600; }
+  .chatlog .m.me b { color: #7ee0a6; }
+  .chatlog .m.sys { color: var(--muted); font-style: italic; font-size: 12px; }
+  .chatform { display:flex; gap: 6px; margin-top: 8px; }
+  .chatform input { flex: 1; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line2); background: #0c1526; color: var(--text); }
+  @media (max-width: 820px) { .lgrid { grid-template-columns: minmax(0, 1fr); } }
+
+  /* ---------- Oyun düzeni ---------- */
   #game { display:flex; flex-direction:column; height: calc(100dvh - 16px); gap: 8px; }
+  .topbar { flex: 0 0 auto; display:flex; align-items:center; gap: 10px; }
+  .tinfo { flex: 1; min-width: 0; display:flex; align-items:center; justify-content:center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .tinfo .ti { display:inline-flex; align-items:center; gap: 6px; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+  .tinfo b { color: var(--text); font-weight: 600; }
+  .tinfo .tile { font-size: 11px; }
+  .topbtn { display:inline-flex; align-items:center; gap: 6px; background: rgba(255,255,255,.05); border: 1px solid var(--line2); border-radius: 10px; padding: 7px 12px; font-weight: 600; font-size: 13px; }
+  .topbtn:hover { background: rgba(255,255,255,.1); }
+  .unread { background: var(--danger); color: #fff; border-radius: 999px; padding: 0 7px; font-size: 11px; font-weight: 700; }
+
   .felt { position: relative; display:grid; flex: 1 1 auto; min-height: 0; overflow: hidden;
-          grid-template-columns: minmax(78px, 150px) 1fr minmax(78px, 150px);
+          grid-template-columns: minmax(84px, 170px) minmax(0, 1fr) minmax(84px, 170px);
           grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px;
-          padding: 12px; border-radius: 26px; border: 12px solid #7a4a22;
-          background: radial-gradient(ellipse at center, #33a35c 0%, #22803f 55%, #175f30 100%);
-          box-shadow: inset 0 0 50px rgba(0,0,0,.35), 0 10px 30px rgba(0,0,0,.55); }
-  .cell { display:flex; align-items:center; justify-content:center; min-width:0; }
+          padding: 12px; border-radius: 22px; border: 10px solid var(--frame);
+          background: radial-gradient(ellipse at 50% 40%, var(--felt1) 0%, var(--felt2) 55%, var(--felt3) 100%);
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 0 60px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06), 0 18px 40px rgba(0,0,0,.5); }
+  .cell { display:flex; align-items:center; justify-content:center; min-width:0; min-height: 0; }
   #c-tl { grid-area: 1/1; } #p-top { grid-area: 1/2; } #c-tr { grid-area: 1/3; }
   #p-left { grid-area: 2/1; } #center { grid-area: 2/2; } #p-right { grid-area: 2/3; }
   #c-bl { grid-area: 3/1; } #p-bottom { grid-area: 3/2; } #c-br { grid-area: 3/3; }
 
-  /* Taş */
-  .tile { font-size: calc(var(--tw) * .56); width: 1.786em; height: 2.54em; border-radius: .25em;
-          background: linear-gradient(#fffdf6, #efe3c3); box-shadow: 0 .08em 0 #c3b184, 0 .14em .3em rgba(0,0,0,.35);
+  /* ---------- Taş ---------- */
+  .tile { font-size: calc(var(--tw) * .56); width: 1.786em; height: 2.54em; border-radius: .22em;
+          background: linear-gradient(180deg, #fffefa 0%, #f3ead5 100%);
+          box-shadow: 0 .06em 0 #cdbd96, 0 .12em .28em rgba(0,0,0,.32), inset 0 0 0 .03em rgba(0,0,0,.06);
           display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight: 800;
           line-height:1; user-select:none; -webkit-user-select:none; touch-action:none; position:relative;
-          transition: transform .12s, box-shadow .12s; flex: 0 0 auto; }
-  .tile .dot { width:.34em; height:.34em; border-radius:50%; border:.07em solid currentColor; margin-top:.16em; opacity:.85; }
-  .tile .star { font-size: 1.05em; color: #3a8f3a; }
+          transition: transform .12s, box-shadow .12s; flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+  .tile .dot { width:.32em; height:.32em; border-radius:50%; border:.07em solid currentColor; margin-top:.18em; opacity:.8; }
+  .tile .star { font-size: 1.05em; color: #2f8f4e; }
   .tile.sm { font-size: calc(var(--tw) * .36); }
   .tile.xs { font-size: calc(var(--tw) * .3); }
+  .tile.ts { font-size: calc(var(--tw) * .42); }
   .c0 { color: var(--red); } .c1 { color: var(--yellow); } .c2 { color: var(--blue); } .c3 { color: var(--black); }
-  .tile.sel { transform: translateY(-.35em); box-shadow: 0 0 0 .12em var(--gold), 0 .4em .7em rgba(0,0,0,.45); }
+  .tile.sel { transform: translateY(-.35em); box-shadow: 0 0 0 .1em var(--accent), 0 .4em .7em rgba(0,0,0,.45); }
+  .tile.isnew { box-shadow: 0 0 0 .1em var(--info), 0 0 .6em rgba(59,130,246,.8); }
+  .tile.isnew.sel { box-shadow: 0 0 0 .1em var(--accent), 0 0 .6em rgba(59,130,246,.8); }
+  .tile .newtag { position:absolute; bottom: -.42em; left: 50%; transform: translateX(-50%); background: var(--info); color:#fff;
+                  font-size: .3em; font-weight: 800; padding: .12em .45em; border-radius: .5em; letter-spacing: .05em; white-space: nowrap; }
+  .tile.down { background: repeating-linear-gradient(45deg, #2a6b4a 0 .18em, #23603f .18em .36em); color: rgba(255,255,255,.55);
+               box-shadow: 0 .06em 0 #123d27, 0 .12em .28em rgba(0,0,0,.35), inset 0 0 0 .06em #f3ead5; }
+  .tile.down .dot { display:none; }
+  .tile.down .peek { font-size: .42em; position:absolute; top:.25em; left:.3em; font-weight: 700; }
+  .tile.down .mark { font-size: .9em; }
+  .tile.chal { cursor: pointer; } .tile.chal:hover { box-shadow: 0 0 0 .1em var(--danger), 0 0 .6em rgba(217,83,79,.7); }
   .tile .islek { position:absolute; top:-.35em; right:-.35em; width:1.5em; height:1.5em; border-radius:50%;
-                 background:#2ecc71; color:#fff; font-size:.38em; display:flex; align-items:center; justify-content:center;
+                 background: var(--ok); color:#fff; font-size:.38em; display:flex; align-items:center; justify-content:center;
                  box-shadow:0 0 0 .1em #fff; font-weight:900; }
-  .tile .islek.okey { background:#9b59b6; }
-  .btn.on { background: var(--gold); color:#2a1c05; box-shadow: 0 3px 0 #b8871d; }
-  .badge.cf { background: #9b59b6; }
-  .seg { display:flex; background: rgba(0,0,0,.25); border-radius: 999px; padding: 4px; margin-bottom: 10px; }
-  .seg button { flex: 1; padding: 8px 10px; border-radius: 999px; background: transparent; color: #fff; font-weight: 600; }
-  .seg button.on { background: var(--gold); color: #2a1c05; }
-  .seg { flex-wrap: nowrap; } .seg button { padding: 7px 6px; font-size: 14px; }
-  .segl { font-size: 13px; opacity: .8; text-align:left; margin: 6px 0 4px; }
-  .mystats { display:flex; gap: 6px; }
-  .stat { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(0,0,0,.35); }
-  .stat.ok { background: #2ecc71; color: #08311a; }
-  .badge.mate { background: #16a085; }
-  .tile.pending { box-shadow: 0 0 0 .12em #e4572e, 0 .14em .3em rgba(0,0,0,.35); }
+  .tile .islek.okey { background:#8b5cf6; }
+  .tile.pending { box-shadow: 0 0 0 .1em var(--danger), 0 .12em .28em rgba(0,0,0,.35); }
   .tile.dragging { opacity: .25; }
-  .dragghost { position: fixed; pointer-events:none; z-index: 50; transform: translate(-50%,-60%) scale(1.12);
-           box-shadow: 0 .6em 1.2em rgba(0,0,0,.5); }
+  .dragghost { position: fixed; pointer-events:none; z-index: 50; transform: translate(-50%,-60%) scale(1.12); box-shadow: 0 .6em 1.2em rgba(0,0,0,.5); }
 
-  /* Oyuncu plakası */
-  .plate { background: rgba(0,0,0,.28); border-radius: 16px; padding: 8px 12px; display:flex; flex-direction:column;
-           align-items:center; gap: 6px; min-width: 0; border: 2px solid transparent; transition: border-color .2s, box-shadow .2s; }
-  .plate.turn { border-color: var(--gold); box-shadow: 0 0 18px rgba(255,209,102,.55); }
-  .plate .who { display:flex; align-items:center; gap: 8px; font-weight: 700; white-space: nowrap; }
-  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #f0e3c4; color:#5b3a12; display:flex;
-            align-items:center; justify-content:center; font-weight: 800; flex: 0 0 auto; }
-  .meta { font-size: 13px; opacity: .85; display:flex; gap: 8px; flex-wrap: wrap; justify-content:center; }
-  .badge { background: rgba(255,255,255,.16); border-radius: 999px; padding: 1px 8px; font-size: 12px; }
-  .badge.op { background: #2e7dd7; }
-  .backs { display:flex; gap: 2px; flex-wrap: wrap; justify-content:center; max-width: 220px; }
-  .back { width: 9px; height: 13px; border-radius: 2px; background: linear-gradient(#fffdf6, #e2d3ad); box-shadow: 0 1px 0 #b19d6c; }
-  .side .backs { max-width: 70px; }
+  /* ---------- Oyuncu plakası ---------- */
+  .plate { background: rgba(8,20,14,.55); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
+           padding: 6px 10px; display:flex; align-items:center; gap: 8px; min-width: 0; max-width: 100%; transition: border-color .2s, box-shadow .2s; }
+  #p-left .plate, #p-right .plate { flex-direction: column; align-items: center; text-align:center; padding: 8px; }
+  .plate.turn { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 18px rgba(233,185,73,.35); }
+  .plate .who { display:flex; align-items:center; gap: 7px; font-weight: 600; white-space: nowrap; min-width: 0; font-size: 14px; }
+  .plate .nm { overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+  .side .plate .nm { max-width: 120px; }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(#f5ead2, #e4d3ad); color:#5b3a12; display:flex;
+            align-items:center; justify-content:center; font-weight: 800; font-size: 13px; flex: 0 0 auto; }
+  .meta { font-size: 12px; color: #c4d0de; display:flex; gap: 6px; flex-wrap: wrap; align-items:center; justify-content:center; }
+  .meta .num { font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .badge { background: rgba(255,255,255,.1); border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge.op { background: rgba(59,130,246,.85); } .badge.cf { background: #8b5cf6; } .badge.mate { background: #0f9e86; }
+  .accuse { background: var(--danger); color:#fff; border-radius: 8px; padding: 4px 9px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .accuse:hover { filter: brightness(1.1); }
+  .mystats { display:flex; gap: 5px; }
+  .stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: rgba(0,0,0,.35); white-space: nowrap; }
+  .stat.ok { background: var(--ok); color: #062615; }
   .offline { opacity: .45; }
+  .backs { display:none; }
 
-  /* Köşelerdeki atılan taşlar */
+  /* ---------- Köşelerdeki atılan taşlar ---------- */
   .pile { display:flex; flex-direction:column; align-items:center; gap: 4px; }
   .pile .slotbox { width: calc(var(--tw) * 1.1); height: calc(var(--tw) * 1.56); border-radius: 8px;
-                   border: 2px dashed rgba(255,255,255,.3); display:flex; align-items:center; justify-content:center; }
+                   border: 1.5px dashed rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; }
   .pile .slotbox .tile { font-size: calc(var(--tw) * .5); }
-  .pile .lbl { font-size: 11px; opacity: .8; text-align:center; }
-  .pile .zoom { font-size: 11px; background: rgba(0,0,0,.25); color:#fff; padding: 2px 8px; border-radius: 999px; }
-  .pile.can .slotbox { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,209,102,.6); cursor:pointer; }
-  .pile.drop .slotbox { border-color: #fff; border-style: solid; background: rgba(255,255,255,.08); }
-  .pile.drop.active .slotbox { box-shadow: 0 0 16px rgba(255,255,255,.6); cursor:pointer; }
+  .pile .lbl { font-size: 11px; color: rgba(255,255,255,.7); text-align:center; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pile .zoom { font-size: 11px; background: rgba(0,0,0,.3); padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08); }
+  .pile.can .slotbox { border: 2px solid var(--accent); box-shadow: 0 0 14px rgba(233,185,73,.55); cursor:pointer; }
+  .pile.drop .slotbox { border: 1.5px solid rgba(255,255,255,.55); background: rgba(255,255,255,.06); }
+  .pile.drop.active .slotbox { border-color: #fff; box-shadow: 0 0 16px rgba(255,255,255,.45); cursor:pointer; }
 
-  /* Orta */
-  #center { flex-direction: column; justify-content: flex-start; gap: 8px; padding-top: 4px; min-height: 0; overflow: hidden; }
-  .mid { display:flex; align-items:center; gap: 16px; flex: 0 0 auto; }
-  .info { display:flex; flex-direction:column; align-items:flex-start; gap: 8px; max-width: 320px; }
-  .deck { position: relative; width: calc(var(--tw) * 1.05); height: calc(var(--tw) * 1.5); }
-  .deck .layer { position:absolute; inset: 0; border-radius: 8px; background: linear-gradient(#fffdf6, #e5d6b0);
-                 box-shadow: 0 2px 0 #b9a676; }
+  /* ---------- Orta ---------- */
+  #center { flex-direction: column; justify-content: flex-start; gap: 6px; padding-top: 0; overflow: hidden; }
+  .mid { display:flex; align-items:center; justify-content:center; gap: 14px; flex: 0 0 auto; flex-wrap: wrap; }
+  .deck { position: relative; width: calc(var(--tw) * .95); height: calc(var(--tw) * 1.35); flex: 0 0 auto; }
+  .deck .layer { position:absolute; inset: 0; border-radius: 7px; background: linear-gradient(#fffefa, #eadfc4); box-shadow: 0 2px 0 #b9a676; }
   .deck .layer:nth-child(1) { transform: translate(4px, 4px); } .deck .layer:nth-child(2) { transform: translate(2px, 2px); }
-  .deck .num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#4c3510;
-               font-weight: 800; font-size: calc(var(--tw) * .5); }
-  .deck.can { cursor:pointer; } .deck.can .layer:nth-child(3) { box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(255,209,102,.7); }
+  .deck .num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#4c3510; font-weight: 800; font-size: calc(var(--tw) * .46); }
+  .deck.can { cursor:pointer; } .deck.can .layer:nth-child(3) { box-shadow: 0 0 0 3px var(--accent), 0 0 18px rgba(233,185,73,.7); }
   .flash .layer:nth-child(3) { animation: flash .45s ease 3; }
   @keyframes flash { 50% { background: #ffe08a; } }
-  .ind { display:flex; flex-direction:column; align-items:center; gap: 3px; font-size: 12px; opacity: .95; }
-  .ind .tile { font-size: calc(var(--tw) * .5); transform: rotate(-8deg); }
-  .okeyinfo { font-size: 13px; background: rgba(0,0,0,.22); padding: 4px 10px; border-radius: 999px; }
-  .banner { font-size: 14px; line-height: 1.35; background: rgba(0,0,0,.45); padding: 8px 14px; border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-  .banner.mine { background: var(--gold); color: #2a1c05; } .banner.mine b { color: #7a2e00; }
-  .banner b { color: var(--gold); }
-  .tsets { display:flex; flex-wrap: wrap; gap: 10px; justify-content:center; align-content:flex-start;
-           flex: 1 1 auto; min-height: 0; overflow-y: auto; width: 100%; padding: 4px; }
-  .obox { background: rgba(0,0,0,.22); border-radius: 12px; padding: 6px 8px 8px; max-width: 100%; }
-  .obox.me { box-shadow: inset 0 0 0 2px rgba(255,209,102,.5); }
-  .owner { font-size: 13px; margin-bottom: 5px; opacity: .95; }
-  .osets { display:flex; flex-wrap: wrap; gap: 6px; }
-  .tile.ts { font-size: calc(var(--tw) * .46); }
-  .tset { display:flex; gap: 2px; padding: 3px; border-radius: 8px; background: rgba(255,255,255,.08); transition: background .15s; }
-  .tset.can { cursor:pointer; } .tset.can:hover, .tset.hover { background: rgba(255,209,102,.35); }
+  .ind { display:flex; flex-direction:column; align-items:center; gap: 3px; font-size: 11px; color: rgba(255,255,255,.8); }
+  .ind .tile { font-size: calc(var(--tw) * .42); transform: rotate(-6deg); }
+  .banner { font-size: 14px; line-height: 1.35; background: rgba(8,20,14,.6); border: 1px solid rgba(255,255,255,.1); padding: 8px 14px; border-radius: 10px; max-width: 420px; }
+  .banner.mine { background: var(--accent); color: #1d1503; border-color: transparent; box-shadow: 0 4px 16px rgba(233,185,73,.35); }
+  .banner.mine b { color: #6b2e00; } .banner b { color: var(--accent); }
+  .tsets { display:flex; flex-wrap: wrap; gap: 8px; justify-content:center; align-content:flex-start;
+           flex: 1 1 auto; min-height: 0; overflow-y: auto; width: 100%; padding: 2px 4px 6px; }
+  .tsets::-webkit-scrollbar { width: 6px; } .tsets::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 3px; }
+  .noopen { color: rgba(255,255,255,.55); font-size: 13px; padding-top: 4px; }
+  .obox { background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 5px 7px 7px; max-width: 100%; }
+  .obox.me { border-color: rgba(233,185,73,.45); }
+  .owner { font-size: 12px; margin-bottom: 4px; color: rgba(255,255,255,.8); }
+  .owner b { color: #fff; }
+  .osets { display:flex; flex-wrap: wrap; gap: 5px; }
+  .tset { display:flex; gap: 2px; padding: 3px; border-radius: 7px; background: rgba(255,255,255,.06); transition: background .15s; }
+  .tset.can { cursor:pointer; } .tset.can:hover, .tset.hover { background: rgba(233,185,73,.35); }
 
-  /* Istaka */
-  .rack { margin: 0 auto; width: fit-content; max-width: 100%; padding: 10px 12px 8px; border-radius: 16px;
-          background: linear-gradient(#cf965a, #a0652f); box-shadow: inset 0 2px 0 rgba(255,255,255,.35), 0 8px 18px rgba(0,0,0,.55); }
+  /* ---------- Kontroller ve ıstaka ---------- */
+  .controls, .rack { flex: 0 0 auto; }
+  .controls { display:flex; flex-wrap: wrap; gap: 6px; justify-content:center; }
+  .group { display:flex; gap: 4px; align-items:center; background: rgba(255,255,255,.03); border: 1px solid var(--line); padding: 4px; border-radius: 12px; }
+  .group .t { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--muted); padding: 0 6px; }
+  .rack { margin: 0 auto; width: fit-content; max-width: 100%; padding: 9px 11px 7px; border-radius: 14px;
+          background: linear-gradient(180deg, #a8743f 0%, #8a5a2c 100%); border: 1px solid #5f3c1b;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 24px rgba(0,0,0,.5); }
   .rrow { display:grid; grid-template-columns: repeat(var(--cols, 15), var(--tw)); gap: 3px; padding: 4px 2px 7px;
-          border-bottom: 7px solid #7d4a1f; border-radius: 0 0 4px 4px; margin-bottom: 6px; }
+          border-bottom: 6px solid #5f3c1b; border-radius: 0 0 4px 4px; margin-bottom: 6px; }
   .rrow:last-child { margin-bottom: 0; }
-  .slot { width: var(--tw); height: calc(var(--tw) * 1.42); border-radius: 6px; background: rgba(60,30,5,.12); }
+  .slot { width: var(--tw); height: calc(var(--tw) * 1.42); border-radius: 6px; background: rgba(40,20,5,.14); }
   .slot.over { background: rgba(255,255,255,.35); }
 
-  .controls, .rack { flex: 0 0 auto; }
-  .controls { display:flex; flex-wrap: wrap; gap: 8px; justify-content:center; }
-  .group { display:flex; gap: 6px; align-items:center; background: rgba(0,0,0,.25); padding: 6px 8px; border-radius: 999px; }
-  .group .t { font-size: 12px; opacity: .8; padding: 0 4px; }
+  /* ---------- Sohbet ---------- */
+  .gchat { position: fixed; left: 14px; top: 58px; z-index: 32; width: min(340px, calc(100vw - 28px)); height: min(400px, 60vh);
+           background: var(--panel); border: 1px solid var(--line2); border-radius: 14px; padding: 10px; display:flex; flex-direction:column;
+           box-shadow: 0 16px 40px rgba(0,0,0,.6); }
+  .gchead { display:flex; justify-content: space-between; align-items:center; margin-bottom: 6px; }
+  .chatpop { position: fixed; left: 14px; top: 58px; z-index: 31; max-width: min(320px, 80vw); background: var(--panel); border: 1px solid var(--line2);
+             border-radius: 12px; padding: 8px 12px; font-size: 13px; animation: tin .25s ease; pointer-events:none; box-shadow: 0 10px 24px rgba(0,0,0,.5); }
+  .chatpop b { color: var(--accent); }
 
-  /* Bildirimler, popup, modal */
-  #toasts { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 60; display:flex;
-            flex-direction:column; gap: 6px; align-items:center; pointer-events:none; width: max-content; max-width: 92vw; }
-  .toast { background: rgba(10,25,16,.92); border: 1px solid rgba(255,255,255,.15); padding: 8px 16px; border-radius: 999px;
-           font-size: 14px; animation: tin .25s ease; box-shadow: 0 6px 16px rgba(0,0,0,.4); }
-  .toast.err { background: #8e2a14; } .toast.big { font-size: 18px; background: #b3261e; padding: 12px 22px; font-weight: 700; }
+  /* ---------- Bildirim, popup, modal ---------- */
+  #toasts { position: fixed; top: 58px; right: 18px; z-index: 60; display:flex;
+            flex-direction:column; gap: 6px; align-items:flex-end; pointer-events:none; width: max-content; max-width: min(380px, 92vw); }
+  .toast { background: rgba(15,26,44,.96); border: 1px solid var(--line2); padding: 8px 16px; border-radius: 10px;
+           font-size: 13px; font-weight: 500; animation: tin .25s ease; box-shadow: 0 8px 20px rgba(0,0,0,.45); }
+  .toast.err { background: #5c1f1d; border-color: #8e2f2b; } .toast.big { font-size: 15px; background: #a1302b; border-color: #c94a44; padding: 10px 18px; font-weight: 700; }
   @keyframes tin { from { opacity:0; transform: translateY(-8px); } }
-  .pop { position: fixed; z-index: 40; background: #153d27; border: 2px solid #7a4a22; border-radius: 14px; padding: 10px;
-         box-shadow: 0 10px 30px rgba(0,0,0,.6); max-width: min(360px, 92vw); }
+  .pop { position: fixed; z-index: 40; background: var(--panel); border: 1px solid var(--line2); border-radius: 12px; padding: 10px;
+         box-shadow: 0 14px 34px rgba(0,0,0,.6); max-width: min(360px, 92vw); }
   .pop .tiles { display:flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
   .pop .tile { cursor:pointer; }
-  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 45; display:flex; align-items:center; justify-content:center; padding: 16px; }
+  .modal { position: fixed; inset: 0; background: rgba(3,8,16,.7); backdrop-filter: blur(3px); z-index: 45; display:flex; align-items:center; justify-content:center; padding: 16px; }
   .modal .card { text-align:left; max-height: 88vh; overflow-y: auto; }
-  .modal.wide .card { width: min(720px, 100%); padding: 0 24px 24px; }
-  .rules h3 { margin: 22px 0 8px; font-size: 18px; color: var(--gold); scroll-margin-top: 110px; }
-  .rules ul { margin: 0; padding-left: 20px; line-height: 1.55; font-size: 15px; }
-  .rules li { margin-bottom: 4px; }
-  .rhead { position: sticky; top: 0; z-index: 2; display:flex; justify-content: space-between; align-items:center;
-           padding: 18px 0 8px; background: #227046; }
-  .rhead h2 { margin: 0; font-size: 22px; }
-  .rtabs { position: sticky; top: 62px; z-index: 2; display:flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 10px; background: #227046; }
-  .rtabs a { color: #fff; text-decoration: none; font-size: 13px; background: rgba(0,0,0,.25); padding: 4px 10px; border-radius: 999px; }
-  .rtabs a:hover { background: var(--gold); color: #2a1c05; }
-  .rt { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 14px; }
-  .rt th, .rt td { border-bottom: 1px solid rgba(255,255,255,.15); padding: 6px 8px; text-align:left; }
-  .rt th { opacity: .75; font-weight: 600; }
-  .rulesbtn { position: fixed; top: 14px; right: 16px; z-index: 30; background: rgba(0,0,0,.5); color:#fff; padding: 8px 14px;
-              border-radius: 999px; font-weight: 700; font-size: 14px; border: 1px solid rgba(255,255,255,.2); }
-  .rulesbtn:hover { background: var(--gold); color: #2a1c05; }
+  .modal.wide .card { width: min(740px, 100%); padding: 0 24px 24px; }
+  .rules h3 { margin: 22px 0 8px; font-size: 16px; color: var(--accent); scroll-margin-top: 110px; }
+  .rules ul { margin: 0; padding-left: 20px; line-height: 1.6; font-size: 14px; color: #d3dbe7; }
+  .rules li { margin-bottom: 4px; } .rules b { color: #fff; }
+  .rhead { position: sticky; top: 0; z-index: 2; display:flex; justify-content: space-between; align-items:center; padding: 18px 0 8px; background: var(--panel2); }
+  .rhead h2 { margin: 0; font-size: 20px; }
+  .rtabs { position: sticky; top: 60px; z-index: 2; display:flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 10px; background: var(--panel2); border-bottom: 1px solid var(--line); }
+  .rtabs a { color: var(--text); text-decoration: none; font-size: 12px; font-weight: 600; background: rgba(255,255,255,.05); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+  .rtabs a:hover { background: var(--accent); color: #1d1503; }
+  .rt { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 13px; }
+  .rt th, .rt td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align:left; }
+  .rt th { color: var(--muted); font-weight: 600; }
   .res { width: 100%; border-collapse: collapse; margin: 12px 0; }
-  .res td { padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,.12); }
-  .res td:nth-child(2), .res td:nth-child(3) { text-align:right; }
-  .plus { color: #ffb4a2; } .minus { color: #a8f0b8; }
+  .res td { padding: 7px 4px; border-bottom: 1px solid var(--line); }
+  .res td:nth-child(2), .res td:nth-child(3) { text-align:right; font-variant-numeric: tabular-nums; }
+  .plus { color: #ff9f97; } .minus { color: #7ee0a6; }
+
+  /* ---------- Büyük uyarı ---------- */
   #alarm { position: fixed; inset: 0; z-index: 65; display:none; align-items:center; justify-content:center; pointer-events:none; }
   #alarm.show { display:flex; animation: alarmBg 2.8s ease forwards; }
-  #alarm .box { text-align:center; padding: 26px 40px; border-radius: 24px; border: 4px solid #fff; box-shadow: 0 20px 60px rgba(0,0,0,.6);
-                animation: pop .45s cubic-bezier(.2,1.6,.4,1); max-width: 90vw; }
-  #alarm.caught .box { background: linear-gradient(#e53935, #a31515); }
-  #alarm.miss .box { background: linear-gradient(#f0b429, #b7791f); color: #2a1c05; border-color: #2a1c05; }
-  #alarm .big { font-size: clamp(34px, 6vw, 64px); font-weight: 900; letter-spacing: 2px; line-height: 1.05; }
-  #alarm .icon { font-size: clamp(44px, 7vw, 80px); display:inline-block; animation: spin 0.6s linear infinite; }
+  #alarm .box { text-align:center; padding: 24px 36px; border-radius: 18px; border: 1px solid rgba(255,255,255,.4); box-shadow: 0 20px 60px rgba(0,0,0,.6);
+                animation: pop .4s cubic-bezier(.2,1.5,.4,1); max-width: 90vw; }
+  #alarm.caught .box { background: linear-gradient(#d9443f, #9c1f1b); }
+  #alarm.miss .box { background: linear-gradient(#e9b949, #b78a1f); color: #1d1503; }
+  #alarm .big { font-size: clamp(30px, 5.5vw, 56px); font-weight: 800; letter-spacing: 1px; line-height: 1.05; }
+  #alarm .icon { font-size: clamp(40px, 6vw, 70px); display:inline-block; animation: spin 0.6s linear infinite; }
   #alarm.miss .icon { animation: shake .4s ease 3; }
-  #alarm .who { font-size: clamp(16px, 2.2vw, 22px); margin-top: 10px; font-weight: 600; }
-  #alarm .pts { margin-top: 10px; display:flex; gap: 10px; justify-content:center; flex-wrap: wrap; }
-  #alarm .pts span { background: rgba(0,0,0,.3); padding: 6px 14px; border-radius: 999px; font-weight: 800; font-size: 18px; }
-  #alarm.miss .pts span { background: rgba(0,0,0,.15); }
-  @keyframes alarmBg { 0%,30%,60% { background: rgba(229,57,53,.45); } 15%,45% { background: rgba(0,0,0,.25); } 85% { opacity: 1; } 100% { opacity: 0; } }
+  #alarm .who { font-size: clamp(14px, 2vw, 19px); margin-top: 10px; font-weight: 500; }
+  #alarm .pts { margin-top: 12px; display:flex; gap: 8px; justify-content:center; flex-wrap: wrap; }
+  #alarm .pts span { background: rgba(0,0,0,.25); padding: 5px 12px; border-radius: 999px; font-weight: 700; font-size: 16px; }
+  #alarm.miss .pts span { background: rgba(0,0,0,.12); }
+  @keyframes alarmBg { 0%,30%,60% { background: rgba(217,68,63,.35); } 15%,45% { background: rgba(0,0,0,.25); } 85% { opacity: 1; } 100% { opacity: 0; } }
   #alarm.miss { animation-name: missBg; }
-  @keyframes missBg { 0% { background: rgba(240,180,41,.35); } 85% { opacity: 1; } 100% { opacity: 0; background: rgba(0,0,0,0); } }
-  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
-  @keyframes spin { 50% { transform: rotate(12deg) scale(1.15); } 0%,100% { transform: rotate(-12deg); } }
+  @keyframes missBg { 0% { background: rgba(233,185,73,.3); } 85% { opacity: 1; } 100% { opacity: 0; background: rgba(0,0,0,0); } }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+  @keyframes spin { 50% { transform: rotate(10deg) scale(1.12); } 0%,100% { transform: rotate(-10deg); } }
   @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-  .btn.cool { opacity: .5; pointer-events: none; }
-  #adov { position: fixed; inset: 0; background: #000; z-index: 70; display:none; align-items:center; justify-content:center;
-          font-size: 22px; color:#ccc; }
-  #log { display:none; margin: 12px auto 0; max-width: 700px; font-size: 13px; opacity: .7; max-height: 90px; overflow:auto; text-align:center; }
+  #adov { position: fixed; inset: 0; background: #000; z-index: 70; display:none; align-items:center; justify-content:center; font-size: 20px; color:#aaa; }
+  #log { display:none; }
 
-  /* ---------- Telefon (JS body'ye phone / port / land sınıfı ekler) ---------- */
+  /* ---------- Telefon (JS body'ye phone / port / land ekler) ---------- */
   body.phone .app { padding: 4px 6px; }
   body.phone #game { gap: 5px; height: calc(100dvh - 8px); }
-  body.phone .felt { border-width: 6px; padding: 5px; gap: 3px; border-radius: 16px; grid-template-columns: 52px minmax(0, 1fr) 52px; }
-  body.phone .plate { padding: 4px 6px; gap: 2px; border-radius: 10px; max-width: 100%; }
-  body.phone .plate .who { font-size: 12px; gap: 4px; white-space: nowrap; }
-  body.phone .plate .nm { overflow: hidden; text-overflow: ellipsis; max-width: 92px; display:inline-block; vertical-align: bottom; }
-  body.phone .side .plate .nm { max-width: 44px; }
+  body.phone .topbar { gap: 6px; }
+  body.phone .tinfo { font-size: 11px; gap: 4px; } body.phone .tinfo .ti { padding: 2px 7px; }
+  body.phone .tinfo .opt { display:none; }
+  body.phone .topbtn { padding: 5px 9px; font-size: 12px; }
+  body.phone .felt { border-width: 6px; padding: 5px; gap: 3px; border-radius: 14px; grid-template-columns: 56px minmax(0, 1fr) 56px; }
+  body.phone .plate { padding: 4px 6px; gap: 4px; border-radius: 9px; }
+  body.phone #p-left .plate, body.phone #p-right .plate { padding: 5px 4px; }
+  body.phone .plate .who { font-size: 12px; gap: 4px; }
+  body.phone .plate .nm { max-width: 90px; } body.phone .side .plate .nm { max-width: 46px; }
   body.phone .avatar { display:none; }
   body.phone .meta { font-size: 10px; gap: 3px; }
-  body.phone .badge { font-size: 10px; padding: 0 5px; }
-  body.phone .plate .btn.red { padding: 3px 8px; font-size: 12px; box-shadow: 0 2px 0 #9e3518; }
+  body.phone .badge { font-size: 9px; padding: 0 5px; }
+  body.phone .accuse { padding: 3px 7px; font-size: 11px; }
   body.phone .lt, body.phone .lt2 { display:none; }
-  body.phone .mystats { gap: 4px; } body.phone .stat { font-size: 11px; padding: 1px 7px; }
+  body.phone .stat { font-size: 10px; padding: 1px 6px; }
   body.phone .pile { gap: 2px; } body.phone .pile .lbl { display:none; }
   body.phone .pile .zoom { font-size: 10px; padding: 1px 6px; }
   body.phone .pile .slotbox { width: calc(var(--tw) * 1.05); height: calc(var(--tw) * 1.5); border-radius: 6px; }
   body.phone .pile .slotbox .tile { font-size: calc(var(--tw) * .48); }
-  body.phone #center { gap: 5px; padding-top: 2px; }
-  body.phone .mid { flex-wrap: wrap; justify-content:center; gap: 8px; }
-  body.phone .info { align-items:center; width: 100%; max-width: 100%; gap: 4px; }
-  body.phone .banner { font-size: 12px; padding: 5px 10px; text-align:center; border-radius: 10px; }
-  body.phone .okeyinfo { font-size: 11px; padding: 2px 8px; }
-  body.phone .ind { font-size: 10px; } body.phone .ind .tile { font-size: calc(var(--tw) * .48); }
-  body.phone .tsets { gap: 5px; padding: 2px; }
-  body.phone .obox { padding: 4px 5px 5px; border-radius: 8px; }
-  body.phone .owner { font-size: 11px; margin-bottom: 3px; }
-  body.phone .osets { gap: 3px; } body.phone .tile.ts { font-size: calc(var(--tw) * .4); }
+  body.phone #center { gap: 5px; }
+  body.phone .mid { gap: 8px; }
+  body.phone .banner { font-size: 12px; padding: 5px 10px; text-align:center; }
+  body.phone .ind { font-size: 9px; } body.phone .ind .tile { font-size: calc(var(--tw) * .46); }
+  body.phone .tsets { gap: 4px; padding: 1px; }
+  body.phone .obox { padding: 3px 4px 4px; border-radius: 7px; }
+  body.phone .owner { font-size: 10px; margin-bottom: 2px; }
+  body.phone .osets { gap: 3px; } body.phone .tile.ts { font-size: calc(var(--tw) * .38); }
   body.phone .controls { gap: 4px; }
-  body.phone .group { padding: 3px; gap: 3px; }
+  body.phone .group { padding: 3px; gap: 3px; border-radius: 10px; }
   body.phone .group .t { display:none; }
   body.phone .btn.sm { padding: 6px 9px; font-size: 12px; }
-  body.phone .rack { padding: 5px 5px 3px; border-radius: 12px; }
+  body.phone .rack { padding: 5px 5px 3px; border-radius: 11px; }
   body.phone .rrow { gap: 2px; padding: 3px 1px 5px; border-bottom-width: 5px; margin-bottom: 3px; }
   body.phone .slot { border-radius: 4px; }
-  body.phone .rulesbtn, body.phone .chatbtn { padding: 5px 10px; font-size: 13px; }
   body.phone .toast { font-size: 12px; padding: 6px 12px; }
-  body.phone .toast.big { font-size: 14px; padding: 8px 14px; }
-  body.phone #alarm .box { padding: 18px 20px; }
-  /* Dikey: ıstaka 3x10, düğmeler masanın üstünde */
+  body.phone .toast.big { font-size: 13px; padding: 8px 12px; }
+  body.phone #alarm .box { padding: 16px 18px; }
+  body.phone .gchat, body.phone .chatpop { top: 44px; left: 8px; }
+  body.phone #toasts { top: 44px; right: auto; left: 50%; transform: translateX(-50%); align-items:center; }
   body.phone.port { --tw: min(38px, calc((100vw - 56px) / 10)); }
-  body.phone.port .felt { margin-top: 34px; }
-  body.phone.port .rulesbtn { top: 4px; right: 8px; }
-  body.phone.port .chatbtn { top: 4px; left: 8px; bottom: auto; }
-  body.phone.port .gchat, body.phone.port .chatpop { top: 42px; bottom: auto; left: 8px; }
-  /* Yatay: her şey sıkı, düğmeler ıstakanın yanlarında */
-  body.phone.land { --tw: min(32px, calc((100vw - 150px) / 15), calc((100dvh - 150px) / 3.3)); }
-  body.phone.land .felt { grid-template-columns: 110px minmax(0, 1fr) 110px; }
-  body.phone.land .plate { flex-direction: row; flex-wrap: wrap; justify-content:center; padding: 3px 8px; gap: 2px 6px; }
-  body.phone.land .side .plate { flex-direction: column; }
-  body.phone.land .side .plate .nm { max-width: 90px; }
+  body.phone.land { --tw: min(32px, calc((100vw - 150px) / 15), calc((100dvh - 170px) / 3.3)); }
+  body.phone.land .felt { grid-template-columns: 120px minmax(0, 1fr) 120px; }
+  body.phone.land .side .plate .nm { max-width: 100px; }
   body.phone.land .mid { flex-wrap: nowrap; }
-  body.phone.land .info { width: auto; }
-  body.phone.land .rulesbtn { top: auto; bottom: 8px; right: 8px; }
-  body.phone.land .chatbtn { bottom: 8px; left: 8px; }
-  body.phone.land .gchat { bottom: 48px; height: min(300px, 70dvh); }
-  body.phone.land .chatpop { bottom: 48px; }
+  body.phone.land .gchat { height: min(300px, 75dvh); }
+  body.phone.land .deck { width: calc(var(--tw) * .85); height: calc(var(--tw) * 1.2); }
+  body.phone.land .ind { font-size: 0; gap: 0; }
+  body.phone.land .felt { padding: 4px 5px; gap: 2px; }
+  body.phone #p-bottom .plate { flex-wrap: wrap; justify-content: center; row-gap: 2px; }
+  body.phone #p-bottom .plate .nm { max-width: 120px; }
 </style>
 </head>
 <body>
@@ -315,8 +340,8 @@
   <!-- Lobi -->
   <div class="lobby2" id="lobby">
     <div class="ltitle">
-      <h1>🀄 Çalmalı 101</h1>
-      <p>Taş çalmak serbest… yakalanırsan yandın! Ya da dürüst masada sakin bir 101.</p>
+      <h1>🀄 Çalmalı <span>101</span></h1>
+      <p>Taş çalmak serbest, yakalanırsan yandın. Ya da dürüst masada sakin bir 101.</p>
       <div class="namerow">
         <input id="name" placeholder="İsmin" maxlength="16">
         <button class="btn ghost" data-act="rules">📖 Kurallar</button>
@@ -371,7 +396,11 @@
 
   <!-- Oyun -->
   <div class="hidden" id="game">
-    <button class="rulesbtn" data-act="rules" title="Kurallar">📖<span class="lt2"> Kurallar</span></button>
+    <div class="topbar">
+      <button class="topbtn" id="chatBtn" data-act="toggleChat">💬<span class="lt2"> Sohbet</span> <span class="unread hidden" id="unread">0</span></button>
+      <div class="tinfo" id="tinfo"></div>
+      <button class="topbtn" data-act="rules" title="Kurallar">📖<span class="lt2"> Kurallar</span></button>
+    </div>
     <div class="felt" id="felt">
       <div class="cell" id="c-tl"></div>
       <div class="cell" id="p-top"></div>
@@ -388,6 +417,7 @@
       <div class="group">
         <button class="btn sm ghost" data-act="sortSeri" id="modeSeri">Seri diz</button>
         <button class="btn sm ghost" data-act="sortCift" id="modeCift">Çift diz</button>
+        <button class="btn sm ghost" data-act="flip" id="flipBtn" title="Seçili taşı ters çevir (okey gibi sayılır)">🔄 Ters çevir</button>
       </div>
       <div class="group">
         <button class="btn sm" data-act="openSeri" id="openSeri">Seri aç</button>
@@ -409,7 +439,6 @@
   </div>
 </div>
 
-<button class="chatbtn hidden" id="chatBtn" data-act="toggleChat">💬<span class="lt2"> Sohbet</span> <span class="unread hidden" id="unread">0</span></button>
 <div class="gchat hidden" id="gchat">
   <div class="gchead"><b>💬 Sohbet</b><button class="btn sm ghost" data-act="toggleChat">✕</button></div>
   <div class="chatlog" id="gchatLog"></div>
@@ -456,6 +485,10 @@ let lastInterstitial = 0;
 let S = null, room = null, you = null;
 let slots = Array(ROWS * COLS).fill(null);   // ıstakadaki dizilim (tile id)
 let selId = null;                            // seçili taş
+let downIds = new Set();                     // ıstakada ters çevrilmiş taşlar (okey gibi sayılır)
+let newIds = new Set();                      // bu tur ortadan/yandan gelen taşlar
+let prevHandIds = null;
+let lastTap = { id: null, t: 0 };
 let selPile = null;                          // çöpten seçili taş {seat, id}
 let popSeat = null;                          // açık çöp listesi
 let lastHandNo = 0;
@@ -551,10 +584,17 @@ function nameOf(seat) { const p = room && room.players.find(p => p.seat === seat
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function tileHTML(t, cls = '', attrs = '') {
   if (!t) return '';
+  if (t.down) {
+    // Ters taş: sahibi köşede gerçek değerini görür, diğerleri sadece arkasını
+    const peek = t.n != null ? `<span class="peek">${t.fake ? '★' : t.n}</span>` : '';
+    return `<div class="tile down ${cls}" ${attrs}>${peek}<span class="mark">◆</span></div>`;
+  }
   const col = t.fake ? 'fake' : 'c' + t.c;
   const inner = t.fake ? '<span class="star">★</span>' : `<span>${t.n}</span><span class="dot"></span>`;
   return `<div class="tile ${col} ${cls}" ${attrs}>${inner}</div>`;
 }
+// Istakadaki taş + ters bilgisi
+const handTile = (t) => (t && downIds.has(t.id) ? { ...t, down: true } : t);
 function act(type, extra = {}, after) {
   socket.emit('action', { type, ...extra }, (r) => {
     if (r && r.error) return toast(r.error, 'err');
@@ -581,6 +621,7 @@ const CORNER = { bottom: 'c-br', right: 'c-tr', top: 'c-tl', left: 'c-bl' };
 
 // ---------- Per kontrolü (sunucudakiyle aynı) ----------
 function norm(t, okey) {
+  if (t.down) return { j: true };
   if (!t.fake && t.c === okey.c && t.n === okey.n) return { j: true };
   if (t.fake) return { c: okey.c, n: okey.n };
   return { c: t.c, n: t.n };
@@ -632,7 +673,7 @@ function rackGroups() {
   return groups;
 }
 function rackSummary() {
-  const byId = Object.fromEntries(S.myHand.map(t => [t.id, t]));
+  const byId = Object.fromEntries(S.myHand.map(t => [t.id, handTile(t)]));
   const seri = [], cift = []; let total = 0;
   for (const g of rackGroups()) {
     const v = validateSet(g.map(id => byId[id]), S.okey);
@@ -646,7 +687,7 @@ function rackSummary() {
 function pools() {
   const ok = S.okey, real = {}, jokers = [];
   for (const t of S.myHand) {
-    if (!t.fake && t.c === ok.c && t.n === ok.n) { jokers.push(t.id); continue; }
+    if (downIds.has(t.id) || (!t.fake && t.c === ok.c && t.n === ok.n)) { jokers.push(t.id); continue; }
     const k = t.fake ? `${ok.c}-${ok.n}` : `${t.c}-${t.n}`;
     (real[k] = real[k] || []).push(t.id);
   }
@@ -851,7 +892,18 @@ document.addEventListener('pointerup', (e) => {
   if (!drag) return;
   const d = drag; drag = null;
   document.querySelectorAll('.over,.hover').forEach(x => x.classList.remove('over', 'hover'));
-  if (!d.moved) { selId = selId === d.id ? null : d.id; render(); return; }
+  if (!d.moved) {
+    const now = Date.now();
+    if (lastTap.id === d.id && now - lastTap.t < 380) {
+      // çift tıklama: taşı at
+      lastTap = { id: null, t: 0 };
+      if (myTurn() && S.phase === 'discard') { selId = null; discard(d.id); }
+      else toast('Taş atmak için sıranın gelmesini bekle', 'err');
+      render(); return;
+    }
+    lastTap = { id: d.id, t: now };
+    selId = selId === d.id ? null : d.id; render(); return;
+  }
   d.ghost.remove();
   const u = document.elementFromPoint(e.clientX, e.clientY);
   const slot = u && u.closest('.slot');
@@ -867,7 +919,7 @@ function discard(id) {
   act('discard', { tileId: id }, () => { selId = null; });
 }
 function attachOrSwap(id, setId) {
-  socket.emit('action', { type: 'attach', tileId: id, setId }, (r) => {
+  socket.emit('action', { type: 'attach', tileId: id, setId, down: downIds.has(id) }, (r) => {
     if (!r.error) { selId = null; return; }
     socket.emit('action', { type: 'swapJoker', tileId: id, setId }, (r2) => {
       if (r2.error) toast(r.error, 'err'); else { selId = null; toast('Okeyi aldın! 😎'); }
@@ -881,6 +933,12 @@ document.addEventListener('click', (e) => {
   if (jc) {
     if (!myName()) { $('name').focus(); return toast('Önce ismini yaz', 'err'); }
     return socket.emit('join', { name: myName(), code: jc.dataset.joincode }, r => r.error && toast(r.error, 'err'));
+  }
+  const ch = e.target.closest('[data-chal]');
+  if (ch) {
+    const [setId, tileId] = ch.dataset.chal.split(':').map(Number);
+    act('challengeDown', { setId, tileId });
+    return;
   }
   const el = e.target.closest('[data-act],[data-pile],[data-zoom],[data-poptile],[data-set],[data-accuse]');
   if (!el) { if (!e.target.closest('#pop')) closePop(); return; }
@@ -943,17 +1001,26 @@ document.addEventListener('click', (e) => {
     case 'openSeri': {
       const s = rackSummary();
       if (!s.seri.length) return toast('Istakada geçerli seri/grup yok. "Seri diz"e bas.', 'err');
-      return act('open', { sets: s.seri });
+      return act('open', { sets: s.seri, down: s.seri.flat().filter(id => downIds.has(id)) });
     }
     case 'openCift': {
       const s = rackSummary();
       if (S.pendingTake && S.pendingTake.mode === 'pairLay') {
         const g = s.cift.find(g => g.includes(S.pendingTake.tileId));
         if (!g) return toast('Aldığın taşı çiftiyle yan yana koy', 'err');
-        return act('open', { sets: [g] });
+        return act('open', { sets: [g], down: g.filter(id => downIds.has(id)) });
       }
       if (!s.cift.length) return toast('Istakada çift yok. "Çift diz"e bas.', 'err');
-      return act('open', { sets: s.cift });
+      return act('open', { sets: s.cift, down: s.cift.flat().filter(id => downIds.has(id)) });
+    }
+    case 'flip': {
+      if (selId == null) return toast('Önce ıstakadan ters çevireceğin taşı seç', 'err');
+      const t = S.myHand.find(x => x.id === selId);
+      if (!S.opts.steal && !downIds.has(selId) && !isJokerTile(t)) return toast('Dürüst masada sadece okey ters çevrilir', 'err');
+      if (downIds.has(selId)) downIds.delete(selId); else downIds.add(selId);
+      if (downIds.has(selId)) toast(isJokerTile(t) ? '🔄 Okeyi ters çevirdin' : '🤫 Okey değil ama okey gibi sayılacak. Yakalanırsan cezası büyük!');
+      if (autoMode) arrange(); else render();
+      return;
     }
     case 'stealDeck': act('steal', { kind: 'deck' }, () => stolen('deck')); return;
     case 'dump':
@@ -993,6 +1060,18 @@ function renderPop() {
 applyMode();
 socket.on('state', (st) => {
   room = st.room; you = st.you; S = st.game;
+  // Ortadan / yandan gelen taşı işaretle (dağıtım hariç)
+  if (S) {
+    const ids = S.myHand.map(t => t.id);
+    if (S.handNo !== lastHandNo || !S.handActive) { newIds = new Set(); downIds = new Set(); prevHandIds = ids; }
+    else {
+      if (prevHandIds) ids.filter(id => !prevHandIds.includes(id)).forEach(id => newIds.add(id));
+      if (S.turn !== you) newIds = new Set();
+      prevHandIds = ids;
+    }
+    for (const id of [...newIds]) if (!ids.includes(id)) newIds.delete(id);
+    for (const id of [...downIds]) if (!ids.includes(id)) downIds.delete(id);
+  }
   if (S && S.handActive && S.handNo !== lastHandNo) {
     lastHandNo = S.handNo; slots = Array(ROWS * COLS).fill(null); selId = null; selPile = null;
     autoMode = S.cifteGoer[you] ? 'cift' : 'seri'; handSig = '';
@@ -1011,6 +1090,16 @@ socket.on('state', (st) => {
 
 socket.on('event', ({ name, data }) => {
   if (name === 'hint') { const d = document.querySelector('.deck'); if (d) { d.classList.remove('flash'); void d.offsetWidth; d.classList.add('flash'); } }
+  if (name === 'fakeCaught') {
+    const t = data.tile, tn = t.fake ? 'sahte okey' : `${COLORS[t.c]} ${t.n}`;
+    alarm('caught', '🃏', 'SAHTE OKEY!',
+      `${esc(nameOf(data.by))}${data.by === you ? ' (sen)' : ''} ters taşı açtı: <b>${esc(nameOf(data.owner))}</b> okey diye <b>${tn}</b> koymuş!`,
+      [`${esc(nameOf(data.owner))} +${data.penalty}${data.times > 1 ? ` (${data.times}. kez!)` : ''}`, `${esc(nameOf(data.by))} -${CFG ? CFG.CATCH_REWARD : 50}`, data.broken ? 'Per bozuldu, taşlar eline döndü' : 'Taş eline döndü']);
+  }
+  if (name === 'fakeMiss') {
+    alarm('miss', '🤦', 'GERÇEK OKEYMİŞ!', `${esc(nameOf(data.by))}${data.by === you ? ' (sen)' : ''} itiraz etti ama ${esc(nameOf(data.owner))} gerçekten okey koymuş.`,
+      [`${esc(nameOf(data.by))} +${data.penalty}`]);
+  }
   if (name === 'caught') {
     const me = data.thief === you ? 'Seni' : data.by === you ? 'Sen' : '';
     alarm('caught', '🚨', 'YAKALANDI!',
@@ -1045,23 +1134,24 @@ socket.on('event', ({ name, data }) => {
 function plateHTML(seat, pos) {
   const p = room.players.find(x => x.seat === seat);
   const turn = S.handActive && S.turn === seat;
-  const op = (S.openType[seat] ? `<span class="badge op">${S.openType[seat] === 'cift' ? S.openPairs[seat] + ' çift açtı' : S.openValue[seat] + ' ile açtı'}</span>` : '')
+  const me = seat === you;
+  const badges = (S.openType[seat] ? `<span class="badge op">${S.openType[seat] === 'cift' ? S.openPairs[seat] + ' çift' : S.openValue[seat] + ' ile açtı'}</span>` : '')
     + (isMate(seat) ? '<span class="badge mate">Eşin</span>' : '')
     + (S.cifteGoer[seat] && !S.openType[seat] ? '<span class="badge cf">Çifte gidiyor</span>' : '');
   const cnt = S.handCounts[seat] || 0;
-  const backs = '';
-  const accuse = seat !== you && S.handActive && S.opts.steal ? `<button class="btn sm red ${Date.now() < accuseCool ? 'cool' : ''}" data-accuse="${seat}">🚨<span class="lt"> Yakaladım!</span></button>` : '';
-  const extra = seat === you ? (S.opts.steal ? `<span class="badge">Çalma hakkı ${S.stealsLeft}</span>` : '') : `<span>${cnt} taş</span>`;
-  let mine = '';
-  if (seat === you && S.handActive && !S.openType[you]) {
+  const accuse = !me && S.handActive && S.opts.steal
+    ? `<button class="accuse ${Date.now() < accuseCool ? 'btn cool' : ''}" data-accuse="${seat}" title="Taş çaldı! Yakala">🚨<span class="lt"> Yakala</span></button>` : '';
+  let stats = '';
+  if (me && S.handActive && !S.openType[you]) {
     const sum = rackSummary();
-    const seriOk = sum.total >= S.openMin, ciftOk = sum.cift.length >= S.openMinPairs;
-    mine = `<div class="mystats"><span class="stat ${seriOk ? 'ok' : ''}">Seri ${sum.total}/${S.openMin}</span><span class="stat ${ciftOk ? 'ok' : ''}">Çift ${sum.cift.length}/${S.openMinPairs}</span></div>`;
+    stats = `<div class="mystats"><span class="stat ${sum.total >= S.openMin ? 'ok' : ''}">Seri ${sum.total}/${S.openMin}</span><span class="stat ${sum.cift.length >= S.openMinPairs ? 'ok' : ''}">Çift ${sum.cift.length}/${S.openMinPairs}</span></div>`;
   }
-  return `<div class="plate ${turn ? 'turn' : ''} ${p && !p.online ? 'offline' : ''}">${mine}
-    <div class="who"><div class="avatar">${esc((p ? p.name : '?')[0].toUpperCase())}</div><span class="nm">${esc(nameOf(seat))}</span>${seat === you ? '<span class="lt"> (sen)</span>' : ''}${turn ? ' ⏳' : ''}</div>
-    <div class="meta"><span>${S.scores[seat]} puan</span>${extra}${op}</div>
-    ${backs}${accuse}</div>`;
+  const meta = me
+    ? `<span><span class="num">${S.scores[seat]}</span> puan</span>${S.opts.steal ? `<span class="badge">🕵️ ${S.stealsLeft} hak</span>` : ''}`
+    : `<span><span class="num">${cnt}</span> taş</span><span><span class="num">${S.scores[seat]}</span> p</span>`;
+  return `<div class="plate ${turn ? 'turn' : ''} ${p && !p.online ? 'offline' : ''}">
+    <div class="who"><div class="avatar">${esc((p ? p.name : '?')[0].toUpperCase())}</div><span class="nm">${esc(nameOf(seat))}</span>${turn ? '<span>⏳</span>' : ''}</div>
+    <div class="meta">${meta}${badges}</div>${stats}${accuse}</div>`;
 }
 
 function pileHTML(seat) {
@@ -1085,34 +1175,40 @@ function centerHTML() {
   if (!S.handActive) banner = S.over ? '🏁 Oyun bitti' : 'El arası…';
   else if (!myTurn()) banner = `Sıra: <b>${esc(nameOf(S.turn))}</b>`;
   else if (S.phase === 'draw') banner = '<b>Sıra sende!</b> Desteden çek ya da soldakinin attığını al';
-  else banner = !S.pendingTake ? '<b>Taşını at:</b> sürükleyip sağ alttaki kutuya bırak'
+  else banner = !S.pendingTake ? '<b>Taşını at:</b> çift tıkla ya da sağ alttaki kutuya sürükle'
     : S.pendingTake.mode === 'pairLay' ? '<b>Çifte gidenden aldın:</b> çiftini yan yana koyup "Çifti koy"a bas ya da geri bırak'
     : `<b>Yandan aldın:</b> bu taşla ${S.pendingTake.mode === 'cift' ? 'çift ' : ''}aç ya da "Geri bırak"a bas`;
   const owners = [...new Set(S.table.map(s => s.owner))];
   const canPlay = myTurn() && S.phase === 'discard';
   const sets = owners.map(o => {
     const how = S.openType[o] === 'cift' ? `${S.openPairs[o]} çift açtı` : S.openType[o] ? `${S.openValue[o]} ile açtı` : '';
-    return `<div class="obox ${o === you ? 'me' : ''}"><div class="owner"><b>${esc(nameOf(o))}</b>${o === you ? ' (sen)' : ''}${how ? ' · ' + how : ''}</div>
+    return `<div class="obox ${o === you ? 'me' : ''}"><div class="owner"><b>${esc(nameOf(o))}</b>${how ? ' · ' + how : ''}</div>
       <div class="osets">${S.table.filter(s => s.owner === o).map(s =>
-        `<div class="tset ${canPlay && s.type !== 'pair' ? 'can' : ''}" data-set="${s.id}">${s.tiles.map(t => tileHTML(t, 'ts')).join('')}</div>`).join('')}</div></div>`;
+        `<div class="tset ${canPlay && s.type !== 'pair' ? 'can' : ''}" data-set="${s.id}">${s.tiles.map(t => {
+          const chal = t.down && o !== you && S.opts.steal && S.handActive;
+          return tileHTML(t, 'ts' + (chal ? ' chal' : ''), chal ? `data-chal="${s.id}:${t.id}" title="Okey değil mi? Tıkla, itiraz et"` : '');
+        }).join('')}</div>`).join('')}</div></div>`;
   }).join('');
   return `
     <div class="mid">
-      <div class="deck ${canDraw ? 'can' : ''}" data-act="draw"><div class="layer"></div><div class="layer"></div><div class="layer"></div><div class="num">${S.deckCount}</div></div>
+      <div class="deck ${canDraw ? 'can' : ''}" data-act="draw" title="Desteden çek"><div class="layer"></div><div class="layer"></div><div class="layer"></div><div class="num">${S.deckCount}</div></div>
       <div class="ind">Gösterge${tileHTML(S.indicator)}</div>
-      <div class="info">
-        <div class="okeyinfo">Okey: <b>${COLORS[S.okey.c]} ${S.okey.n}</b> · ${S.handNo}/${S.totalHands}. el</div>
-        <div class="banner ${myTurn() ? 'mine' : ''}">${banner}</div>
-      </div>
+      <div class="banner ${myTurn() ? 'mine' : ''}">${banner}</div>
     </div>
-    <div class="tsets">${sets || '<span style="opacity:.6;font-size:13px">Henüz açan yok</span>'}</div>`;
+    <div class="tsets">${sets || '<div class="noopen">Henüz açan yok</div>'}</div>`;
 }
 
 function render() {
   $('lobby').classList.toggle('hidden', !!room);
   $('waiting').classList.toggle('hidden', !room || !!S);
   $('game').classList.toggle('hidden', !S);
-  $('chatBtn').classList.toggle('hidden', !S);
+  if (S && room) {
+    const o = S.opts || {};
+    $('tinfo').innerHTML = `<span class="ti">Masa <b>${room.code}</b></span>
+      <span class="ti"><b>${S.handNo}/${S.totalHands}</b>. el</span>
+      <span class="ti">Okey ${S.okey ? tileHTML({ c: S.okey.c, n: S.okey.n }) : ''}</span>
+      <span class="ti opt">${o.steal ? '🕵️ Çalmalı' : '😇 Dürüst'} · ${o.katlamali ? 'Katlamalı' : 'Katlamasız'}${o.esli ? ' · Eşli' : ''}</span>`;
+  }
   if (!S) { chatOpen = false; $('gchat').classList.add('hidden'); }
   if (room && !S) {
     $('wcode').textContent = room.code;
@@ -1139,9 +1235,10 @@ function render() {
   for (let r = 0; r < ROWS; r++) {
     html += '<div class="rrow">';
     for (let c = 0; c < COLS; c++) {
-      const idx = r * COLS + c, id = slots[idx], t = id != null ? byId[id] : null;
-      const cls = (id === selId ? 'sel ' : '') + (S.pendingTake && S.pendingTake.tileId === id ? 'pending' : '');
+      const idx = r * COLS + c, id = slots[idx], t = id != null ? handTile(byId[id]) : null;
+      const cls = (id === selId ? 'sel ' : '') + (S.pendingTake && S.pendingTake.tileId === id ? 'pending ' : '') + (newIds.has(id) ? 'isnew' : '');
       let tile = t ? tileHTML(t, cls, `data-id="${id}"`) : '';
+      if (t && newIds.has(id)) tile = tile.replace(/<\/div>$/, '<span class="newtag">YENİ</span></div>');
       if (t && isJokerTile(t)) tile = tile.replace(/<\/div>$/, '<span class="islek okey" title="Okey">★</span></div>');
       else if (t && islek.has(id)) tile = tile.replace(/<\/div>$/, '<span class="islek" title="İşlek: masadaki bir pere gider">İ</span></div>');
       html += `<div class="slot" data-idx="${idx}">${tile}</div>`;
@@ -1183,7 +1280,7 @@ function rulesHTML() {
     <div class="rhead"><h2>📖 Çalmalı 101 Kuralları</h2><button class="btn sm ghost" data-act="closeModal">Kapat ✕</button></div>
     <nav class="rtabs">
       <a href="#r-temel">Temel</a><a href="#r-acma">Açma</a><a href="#r-yandan">Yandan alma</a><a href="#r-cifte">Çifte gitmek</a>
-      <a href="#r-islek">İşleme</a><a href="#r-puan">Puanlama</a><a href="#r-calma">🕵️ Taş çalma</a><a href="#r-ekran">Ekran</a>
+      <a href="#r-islek">İşleme</a><a href="#r-puan">Puanlama</a><a href="#r-calma">🕵️ Taş çalma</a><a href="#r-ters">🔄 Ters taş</a><a href="#r-ekran">Ekran</a>
     </nav>
 
     <h3 id="r-temel">🀄 Temel</h3>
@@ -1264,10 +1361,25 @@ function rulesHTML() {
     </table>
     <ul><li>"Yakaladım!" düğmesine ${Math.round(v('ACCUSE_COOLDOWN_MS', 3000) / 1000)} saniyede bir basılabilir.</li></ul>
 
+    <h3 id="r-ters">🔄 Ters taş (sahte okey)</h3>
+    <ul>
+      <li>Istakada bir taşı seçip <b>🔄 Ters çevir</b>'e basarsan taş ters döner ve <b>okey gibi sayılır</b>. Masaya ters iner, rakipler sadece arkasını görür.</li>
+      <li>Okeyi ters koymak serbest. <b>Okey olmayan</b> bir taşı ters koymak hiledir (sadece çalmalı masada).</li>
+      <li>Rakip masadaki ters taşa tıklayıp <b>itiraz</b> edebilir:
+        <ul>
+          <li>Taş okey değilse sahibi <b>+${v('FAKE_OKEY_PENALTY', 202)}</b> ceza yer (aynı elde her seferinde 2 katı). Taş eline döner, per bozulursa bütün per eline döner. İtiraz eden <b>-${v('CATCH_REWARD', 50)}</b> alır.</li>
+          <li>Taş gerçekten okeyse itiraz eden <b>+${v('FALSE_ACCUSE_PENALTY', 50)}</b> ceza yer, taş açılır.</li>
+        </ul>
+      </li>
+      <li>Ters taşın yerine geçen gerçek taşla okeyi almaya çalışan da sahteyi ortaya çıkarır.</li>
+      <li>Dürüst masada sadece gerçek okey ters çevrilebilir.</li>
+    </ul>
+
     <h3 id="r-ekran">🖐️ Ekran ve kontroller</h3>
     <ul>
       <li><b>Deste:</b> sıran gelince parlar, tıkla ve çek. Soldakinin attığı taşı almak için onun köşesindeki parlayan taşa tıkla.</li>
-      <li><b>Taş atmak:</b> taşı sağ alttaki kutuya sürükle (ya da taşı seçip kutuya tıkla). Son taşını atınca el biter.</li>
+      <li><b>Taş atmak:</b> ıstakadaki taşa <b>çift tıkla</b>, ya da sağ alttaki kutuya sürükle. Son taşını atınca el biter.</li>
+      <li>Ortadan ya da yandan aldığın taş ıstakada mavi çerçeve ve <b>YENİ</b> etiketiyle görünür.</li>
       <li><b>Seri diz / Çift diz:</b> ıstakayı en iyi şekilde dizer ve yeni taş geldikçe kendini yeniden dizer. Bir taşı elle sürüklersen otomatik dizme durur.</li>
       <li>İsminin üstündeki <b>Seri</b> ve <b>Çift</b> sayaçları açmaya ne kadar yakın olduğunu gösterir, yeterince olunca yeşile döner.</li>
     </ul>

@@ -21,6 +21,7 @@ const CONFIG = {
   CATCH_WINDOW_MS: 6000,      // çaldıktan sonra yakalanabileceği süre
   CAUGHT_PENALTY: 101,        // yakalanan hırsızın ilk cezası; aynı elde her yakalanışta 2 katı
   CATCH_REWARD: 50,           // yakalayanın puanından düşülür
+  FAKE_OKEY_PENALTY: 202,     // okey olmayan taşı ters koyup yakalanan; aynı elde her seferinde 2 katı
   FALSE_ACCUSE_PENALTY: 50,   // boşuna "Yakaladım!" diyenin cezası
   ACCUSE_COOLDOWN_MS: 3000,
   DECK_HINT_CHANCE: 0.6,      // desteden çalınca diğerlerine ipucu gitme ihtimali
@@ -51,6 +52,7 @@ const nextValue = (n) => (n === 13 ? 1 : n + 1);
 
 // Okey joker olur, sahte okey okeyin kimliğine bürünür
 function norm(t, okey) {
+  if (t.down) return { j: true };   // ters çevrilmiş taş okey gibi sayılır (gerçekten okey olmasa bile)
   if (!t.fake && t.c === okey.c && t.n === okey.n) return { j: true };
   if (t.fake) return { c: okey.c, n: okey.n };
   return { c: t.c, n: t.n };
@@ -272,6 +274,7 @@ class Okey101 {
     this.stealCount = Array(this.n).fill(0);
     this.extra = Array(this.n).fill(0);               // desteden çalınıp henüz yana atılmamış taş sayısı
     this.caughtThisHand = Array(this.n).fill(0);      // bu elde kaç kez yakalandı (ceza katlanır)
+    this.fakeCaught = Array(this.n).fill(0);          // bu elde kaç kez sahte okeyle yakalandı
     this.refundUsed = Array(this.n).fill(false);
     this.handActive = true;
     this.lastResult = null;
@@ -368,9 +371,17 @@ class Okey101 {
 
   // ---------- Açma ve işleme ----------
   // sets: [[tileId, ...], ...]  (seri için sıra önemli)
-  checkSets(seat, sets) {
+  // down: ters çevrilerek konan taşların id'leri (okey gibi sayılır)
+  faceDown(seat, t, downSet) {
+    if (!downSet.has(t.id)) return { ...t };
+    if (!this.opts.steal && !this.isJoker(t)) return null; // dürüst masada sadece okey ters konur
+    return { ...t, down: true };
+  }
+
+  checkSets(seat, sets, down = []) {
     if (!Array.isArray(sets) || !sets.length) return fail('Per yok');
     const hand = this.hands[seat];
+    const downSet = new Set(Array.isArray(down) ? down : []);
     const used = new Set();
     const result = [];
     for (const ids of sets) {
@@ -380,7 +391,9 @@ class Okey101 {
         const t = hand.find((x) => x.id === id);
         if (!t || used.has(id)) return fail('Taş elinde değil');
         used.add(id);
-        tiles.push(t);
+        const copy = this.faceDown(seat, t, downSet);
+        if (!copy) return fail('Dürüst masada sadece okey ters çevrilebilir');
+        tiles.push(copy);
       }
       const v = validateSet(tiles, this.okey);
       if (!v) return fail('Geçersiz per var');
@@ -392,9 +405,9 @@ class Okey101 {
     return { ok: true, result, used, total, kind: pairs ? 'cift' : 'seri' };
   }
 
-  open(seat, sets) {
+  open(seat, sets, down) {
     const e = this.checkTurn(seat, 'discard'); if (e) return e;
-    const c = this.checkSets(seat, sets);
+    const c = this.checkSets(seat, sets, down);
     if (!c.ok) return c;
     const current = this.openType[seat];
 
@@ -455,7 +468,7 @@ class Okey101 {
     return null;
   }
 
-  attach(seat, tileId, setId) {
+  attach(seat, tileId, setId, down) {
     const e = this.checkTurn(seat, 'discard'); if (e) return e;
     if (this.openType[seat] !== 'seri') return fail('İşlemek için önce seri açmalısın');
     const hand = this.hands[seat];
@@ -464,7 +477,9 @@ class Okey101 {
     if (hand.length < 2) return fail('Atmak için elinde bir taş kalmalı');
     const set = this.table.find((s) => s.id === setId);
     if (!set) return fail('Per bulunamadı');
-    const tiles = this.attachResult(hand[i], set);
+    const copy = this.faceDown(seat, hand[i], new Set(down ? [tileId] : []));
+    if (!copy) return fail('Dürüst masada sadece okey ters çevrilebilir');
+    const tiles = this.attachResult(copy, set);
     if (!tiles) return fail('Bu taş bu pere gitmez');
     set.tiles = tiles;
     hand.splice(i, 1);
@@ -481,18 +496,66 @@ class Okey101 {
     const set = this.table.find((s) => s.id === setId);
     if (!set || set.type === 'pair') return fail('Per bulunamadı');
     for (let k = 0; k < set.tiles.length; k++) {
-      if (!this.isJoker(set.tiles[k])) continue;
+      const st = set.tiles[k];
+      if (!st.down && !this.isJoker(st)) continue;
       const tiles = [...set.tiles];
-      tiles[k] = hand[i];
+      tiles[k] = { ...hand[i] };
       const v = validateSet(tiles, this.okey);
       if (v && v.type === set.type) {
-        const joker = set.tiles[k];
+        // Ters taş aslında okey değilse: almaya çalışan sahteyi ortaya çıkarır
+        if (st.down && !this.isJoker(st) && set.owner !== seat) return this.challengeDown(seat, setId, st.id, true);
         set.tiles = tiles;
-        hand[i] = joker;
+        hand[i] = this.cleanTile(st);
         return ok();
       }
     }
     return fail('Bu taş buradaki okeyin yerine geçmez');
+  }
+
+  cleanTile(t) {
+    const c = { id: t.id, c: t.c, n: t.n };
+    if (t.fake) c.fake = true;
+    return c;
+  }
+
+  // Masadaki ters taşa itiraz: "Bu okey değil!"
+  challengeDown(seat, setId, tileId, viaSwap = false) {
+    if (!this.handActive) return fail('El aktif değil');
+    const set = this.table.find((s) => s.id === setId);
+    if (!set) return fail('Per bulunamadı');
+    const k = set.tiles.findIndex((t) => t.id === tileId);
+    if (k < 0 || !set.tiles[k].down) return fail('Bu taş ters değil');
+    if (set.owner === seat) return fail('Kendi taşına itiraz edemezsin');
+    const now = Date.now();
+    if (!viaSwap) {
+      if (now - this.lastAccuse[seat] < CONFIG.ACCUSE_COOLDOWN_MS) return fail('Biraz bekle');
+      this.lastAccuse[seat] = now;
+    }
+    const tile = set.tiles[k];
+    const owner = set.owner;
+
+    if (this.isJoker(tile)) {
+      // Gerçekten okey: ters taş açılır, itiraz eden ceza yer
+      set.tiles[k] = { ...tile, down: false, shown: true };
+      this.scores[seat] += CONFIG.FALSE_ACCUSE_PENALTY;
+      return ok([{ to: 'all', name: 'fakeMiss', data: { by: seat, owner, penalty: CONFIG.FALSE_ACCUSE_PENALTY } }]);
+    }
+
+    // Sahte okey: sahibi ceza yer (202, 404...), taş eline geri döner
+    const penalty = CONFIG.FAKE_OKEY_PENALTY * 2 ** this.fakeCaught[owner];
+    this.fakeCaught[owner]++;
+    this.scores[owner] += penalty;
+    this.scores[seat] -= CONFIG.CATCH_REWARD;
+    set.tiles.splice(k, 1);
+    this.hands[owner].push(this.cleanTile(tile));
+    let broken = false;
+    if (!validateSet(set.tiles, this.okey)) {
+      // per bozulduysa bütün taşlar sahibine döner
+      for (const t of set.tiles) this.hands[owner].push(this.cleanTile(t));
+      this.table = this.table.filter((s) => s !== set);
+      broken = true;
+    }
+    return ok([{ to: 'all', name: 'fakeCaught', data: { by: seat, owner, tile: this.cleanTile(tile), penalty, times: this.fakeCaught[owner], broken } }]);
   }
 
   // ---------- Atma ve bitirme ----------
@@ -700,7 +763,10 @@ class Okey101 {
       myHand: this.hands ? this.hands[seat] : [],
       handCounts: this.hands ? this.hands.map((h) => h.length) : [],
       discards: this.discards || [],
-      table: this.table || [],
+      table: (this.table || []).map((s) => ({
+        ...s,
+        tiles: s.tiles.map((t) => (t.down && s.owner !== seat ? { id: t.id, down: true } : t)),
+      })),
       openType: this.openType || [],
       cifteGoer: this.cifteGoer || [],
       indicator: this.indicator || null,
