@@ -1,12 +1,14 @@
 {
   "name": "calmali-okey",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Taş çalmanın serbest olduğu online okey (oda kodlu)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test"
   },
   "dependencies": {
+    "compression": "^1.7.5",
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
   },

@@ -25,6 +25,12 @@ const CONFIG = {
   FALSE_ACCUSE_PENALTY: 50,   // boşuna "Yakaladım!" diyenin cezası
   ACCUSE_COOLDOWN_MS: 3000,
   DECK_HINT_CHANCE: 0.6,      // desteden çalınca diğerlerine ipucu gitme ihtimali
+  // Süre
+  TURN_TIME_OPTIONS: [0, 15, 30, 45], // saniye; 0 = süresiz
+  DEFAULT_TURN_SEC: 30,
+  AFK_AFTER_TIMEOUTS: 2,      // üst üste bu kadar süre kaçıran otomatik oynanır (bir hamle yapınca kontrol geri gelir)
+  AUTO_DELAY_MS: 1500,        // otomatik oynananın hamlesi için bekleme
+  OFFLINE_GRACE_MS: 10000,    // bağlantısı kopanın yeniden bağlanması için beklenen süre
   // Reklam
   REWARD_REFUND_RATIO: 0.5,   // ödüllü reklam: son elin cezasının ne kadarı silinir
 };
@@ -229,7 +235,11 @@ class Okey101 {
       katlamali: !!opts.katlamali,
       steal: opts.steal !== false,                       // false: dürüst oyun, çalma kapalı
       hands: Number(opts.hands) > 0 ? Number(opts.hands) : CONFIG.TOTAL_HANDS,
+      turnTime: CONFIG.TURN_TIME_OPTIONS.includes(Number(opts.turnTime)) ? Number(opts.turnTime) : CONFIG.DEFAULT_TURN_SEC,
     };
+    this.timeouts = Array(seatCount).fill(0);   // üst üste süre kaçırma sayısı
+    this.auto = Array(seatCount).fill(false);   // otomatik oynananlar
+    this.turnDeadline = 0;
     this.scores = Array(seatCount).fill(0);
     this.dealer = seatCount - 1;
     this.handNo = 0;
@@ -278,7 +288,57 @@ class Okey101 {
     this.refundUsed = Array(this.n).fill(false);
     this.handActive = true;
     this.lastResult = null;
+    this.beginTurn();
     return ok([{ to: 'all', name: 'handStarted', data: { handNo: this.handNo } }]);
+  }
+
+  // ---------- Süre ----------
+  beginTurn() {
+    this.turnDeadline = this.opts.turnTime ? Date.now() + this.opts.turnTime * 1000 : 0;
+  }
+
+  // Oyuncu kendisi bir hamle yaptı: otomatik oynama biter
+  markActive(seat) {
+    if (seat < 0 || seat >= this.n) return;
+    this.timeouts[seat] = 0;
+    this.auto[seat] = false;
+  }
+
+  // Süre doldu
+  onTimeout(seat) {
+    if (!this.handActive || this.turn !== seat) return fail('Sıra değişti');
+    this.timeouts[seat]++;
+    if (this.timeouts[seat] >= CONFIG.AFK_AFTER_TIMEOUTS) this.auto[seat] = true;
+    const r = this.autoPlay(seat);
+    if (r.ok) r.events.unshift({ to: 'all', name: 'timeout', data: { seat, auto: this.auto[seat] } });
+    return r;
+  }
+
+  // Sırayı oyuncunun yerine oynar: gerekirse çeker, sonra en zararsız taşı atar
+  autoPlay(seat) {
+    if (!this.handActive || this.turn !== seat) return fail('Sıra değişti');
+    const events = [];
+    if (this.phase === 'discard' && this.pendingTake) {
+      const u = this.untake(seat);
+      if (u.ok) events.push(...u.events);
+    }
+    let drawnId = null;
+    if (this.phase === 'draw') {
+      if (!this.deck.length) return fail('Deste bitti');
+      const d = this.draw(seat);
+      if (!d.ok) return d;
+      drawnId = this.hands[seat][this.hands[seat].length - 1].id;
+    }
+    const hand = this.hands[seat];
+    const safe = (t) => !this.isJoker(t) && !this.table.some((s) => this.attachResult(t, s));
+    let pick = hand.find((t) => t.id === drawnId && safe(t));
+    if (!pick) {
+      const cands = hand.filter(safe).sort((a, b) => b.n - a.n);
+      pick = cands[0] || hand[hand.length - 1];
+    }
+    const r = this.discard(seat, pick.id);
+    if (r.ok) r.events.unshift(...events, { to: 'all', name: 'autoPlayed', data: { seat } });
+    return r;
   }
 
   teamOf(s) { return this.opts.esli ? s % 2 : s; }
@@ -590,6 +650,7 @@ class Okey101 {
     this.turn = (seat + 1) % this.n;
     this.turnNo++;
     this.phase = 'draw';
+    this.beginTurn();
     if (!this.deck.length) {
       const r = this.endHand(null, false);
       r.events.unshift(...events);
@@ -604,6 +665,7 @@ class Okey101 {
   // - Eşli oyunda katlar sadece rakiplere uygulanır; bitenin eşi kalanını tek yazar.
   endHand(winner, okeyFinish) {
     this.handActive = false;
+    this.turnDeadline = 0;
     const penalties = Array(this.n).fill(0);
     let mult = 1, elden = false, cifte = false;
     if (winner !== null) {
@@ -785,6 +847,9 @@ class Okey101 {
       openValue: this.openValue || [],
       openPairs: this.openPairs || [],
       opts: this.opts,
+      turnDeadline: this.turnDeadline,
+      auto: this.auto,
+      serverNow: Date.now(),
     };
   }
 }

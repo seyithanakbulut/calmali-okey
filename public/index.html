@@ -157,6 +157,16 @@
   .meta .num { font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
   .badge { background: rgba(255,255,255,.1); border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; }
   .badge.op { background: rgba(59,130,246,.85); } .badge.cf { background: #8b5cf6; } .badge.mate { background: #0f9e86; }
+  .tsec { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 12px; background: rgba(255,255,255,.12); border-radius: 999px; padding: 0 7px; min-width: 26px; text-align:center; }
+  .tsec.low, .bsec.low { color: #fff; background: var(--danger); animation: pulse .5s ease infinite alternate; }
+  .bsec { font-weight: 800; font-variant-numeric: tabular-nums; background: rgba(0,0,0,.18); border-radius: 999px; padding: 0 7px; }
+  .badge.bot { background: rgba(255,255,255,.18); }
+  .tbar { position: absolute; left: 8px; right: 8px; bottom: 3px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .tbar i { display:block; height: 100%; width: 100%; background: var(--accent); border-radius: 3px; transition: width .2s linear; }
+  .tbar i.low { background: var(--danger); }
+  .plate { position: relative; }
+  .plate.turn.low { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger), 0 0 18px rgba(217,83,79,.5); }
+  @keyframes pulse { to { transform: scale(1.12); } }
   .accuse { background: var(--danger); color:#fff; border-radius: 8px; padding: 4px 9px; font-size: 12px; font-weight: 700; white-space: nowrap; }
   .accuse:hover { filter: brightness(1.1); }
   .mystats { display:flex; gap: 5px; }
@@ -356,6 +366,8 @@
         <div class="seg" data-opt="katlamali"><button data-v="0">Katlamasız</button><button data-v="1">Katlamalı</button></div>
         <div class="segl">Taş çalma</div>
         <div class="seg" data-opt="steal"><button data-v="1">🕵️ Çalmalı</button><button data-v="0">😇 Dürüst</button></div>
+        <div class="segl">Sıra süresi</div>
+        <div class="seg" data-opt="turnTime"><button data-v="15">15 sn</button><button data-v="30">30 sn</button><button data-v="45">45 sn</button><button data-v="0">Süresiz</button></div>
         <div class="segl">Kaç el</div>
         <div class="seg" data-opt="hands"><button data-v="1">1</button><button data-v="3">3</button><button data-v="5">5</button><button data-v="7">7</button><button data-v="9">9</button><button data-v="11">11</button></div>
         <div class="segl">Masa</div>
@@ -424,6 +436,7 @@
         <button class="btn sm" data-act="openCift" id="openCift">Çift aç</button>
         <button class="btn sm red" data-act="askCifte" id="cifteBtn">Çifte gidiyorum</button>
         <button class="btn sm ghost hidden" data-act="untake" id="untakeBtn">↩ Geri bırak</button>
+        <button class="btn sm blue hidden" data-act="here" id="hereBtn">🙋 Buradayım</button>
       </div>
       <div class="group" id="stealGroup">
         <span class="t">🕵️ Çal</span>
@@ -495,19 +508,22 @@ let lastHandNo = 0;
 let resultSeen = 0;
 let autoMode = 'seri';   // 'seri' | 'cift' | null : yeni taş gelince kendiliğinden dizer
 let handSig = '';
-const createOpts = { esli: false, katlamali: false, steal: true, hands: 9, isPublic: true };
+let clockSkew = 0, warned5 = '';
+const remainingMs = () => (S && S.turnDeadline ? S.turnDeadline - (Date.now() + clockSkew) : 0);
+const createOpts = { esli: false, katlamali: false, steal: true, hands: 9, turnTime: 30, isPublic: true };
+const NUM_OPTS = ['hands', 'turnTime'];
 function segUpdate() {
   document.querySelectorAll('.seg[data-opt]').forEach(seg => {
     const k = seg.dataset.opt, cur = createOpts[k];
     seg.querySelectorAll('button').forEach(b => {
-      const v = k === 'hands' ? Number(b.dataset.v) : b.dataset.v === '1';
+      const v = NUM_OPTS.includes(k) ? Number(b.dataset.v) : b.dataset.v === '1';
       b.classList.toggle('on', v === cur);
     });
   });
 }
 document.querySelectorAll('.seg[data-opt] button').forEach(b => b.addEventListener('click', () => {
   const k = b.parentElement.dataset.opt;
-  createOpts[k] = k === 'hands' ? Number(b.dataset.v) : b.dataset.v === '1';
+  createOpts[k] = NUM_OPTS.includes(k) ? Number(b.dataset.v) : b.dataset.v === '1';
   segUpdate();
 }));
 setTimeout(segUpdate, 0);
@@ -526,6 +542,7 @@ function optChips(o) {
     `<span class="chip">${o.katlamali ? 'Katlamalı' : 'Katlamasız'}</span>`,
     o.steal ? '<span class="chip steal">🕵️ Çalmalı</span>' : '<span class="chip honest">😇 Dürüst</span>',
     `<span class="chip">${o.hands} el</span>`,
+    `<span class="chip">⏱ ${o.turnTime ? o.turnTime + ' sn' : 'Süresiz'}</span>`,
     o.isPublic ? '' : '<span class="chip">🔒 Kodla</span>',
   ].join('');
 }
@@ -1013,6 +1030,7 @@ document.addEventListener('click', (e) => {
       if (!s.cift.length) return toast('Istakada çift yok. "Çift diz"e bas.', 'err');
       return act('open', { sets: s.cift, down: s.cift.flat().filter(id => downIds.has(id)) });
     }
+    case 'here': return act('here', {}, () => toast('Kontrol sende 👍'));
     case 'flip': {
       if (selId == null) return toast('Önce ıstakadan ters çevireceğin taşı seç', 'err');
       const t = S.myHand.find(x => x.id === selId);
@@ -1057,9 +1075,27 @@ function renderPop() {
 }
 
 // ---------- Socket ----------
+// Süre çubuğu ve saniye (her 200 ms)
+setInterval(() => {
+  if (!S || !S.handActive || !S.turnDeadline) return;
+  const ms = remainingMs(), total = (S.opts.turnTime || 30) * 1000;
+  const pct = Math.max(0, Math.min(1, ms / total));
+  const low = ms <= 5000;
+  document.querySelectorAll('[data-tbar]').forEach(el => { el.style.width = (pct * 100) + '%'; el.classList.toggle('low', low); });
+  document.querySelectorAll('[data-tsec]').forEach(el => { el.textContent = Math.max(0, Math.ceil(ms / 1000)); el.classList.toggle('low', low); });
+  document.querySelectorAll('[data-turnplate]').forEach(el => el.classList.toggle('low', low));
+  const key = S.handNo + ':' + S.turnDeadline;
+  if (myTurn() && low && ms > 0 && warned5 !== key) {
+    warned5 = key;
+    toast('⏰ Süren bitiyor!', 'err');
+    try { navigator.vibrate && navigator.vibrate(200); } catch (e) {}
+  }
+}, 200);
+
 applyMode();
 socket.on('state', (st) => {
   room = st.room; you = st.you; S = st.game;
+  if (S && S.serverNow) clockSkew = S.serverNow - Date.now();
   // Ortadan / yandan gelen taşı işaretle (dağıtım hariç)
   if (S) {
     const ids = S.myHand.map(t => t.id);
@@ -1119,6 +1155,11 @@ socket.on('event', ({ name, data }) => {
     if (data.bonus) toast(`🔥 ${nameOf(data.seat)} ${data.bonus === 202 ? 'çift' : 'tek'} siler! -${data.bonus}`, 'big');
   }
   if (name === 'untake' && data.seat !== you) toast(`↩ ${nameOf(data.seat)} aldığı taşı geri bıraktı`);
+  if (name === 'timeout') {
+    if (data.seat === you) toast(data.auto ? '🤖 Üst üste süreni kaçırdın, otomatik oynanıyorsun. "Buradayım"a bas.' : '⏰ Süren doldu, senin yerine oynandı', 'err');
+    else toast(`⏰ ${nameOf(data.seat)} süresini doldurdu${data.auto ? ', artık otomatik oynanıyor' : ''}`);
+  }
+  if (name === 'back' && data.seat !== you) toast(`🙋 ${nameOf(data.seat)} masaya döndü`);
   if (name === 'cifteDeclared') toast(`👯 ${nameOf(data.seat)} çifte gidiyor!`, data.seat === you ? '' : 'big');
   if (name === 'refunded') toast(`🎬 ${nameOf(data.seat)} reklam izleyip ${data.back} ceza sildi`);
   if (name === 'handStarted') toast(`🀄 ${data.handNo}. el başladı`);
@@ -1149,9 +1190,9 @@ function plateHTML(seat, pos) {
   const meta = me
     ? `<span><span class="num">${S.scores[seat]}</span> puan</span>${S.opts.steal ? `<span class="badge">🕵️ ${S.stealsLeft} hak</span>` : ''}`
     : `<span><span class="num">${cnt}</span> taş</span><span><span class="num">${S.scores[seat]}</span> p</span>`;
-  return `<div class="plate ${turn ? 'turn' : ''} ${p && !p.online ? 'offline' : ''}">
-    <div class="who"><div class="avatar">${esc((p ? p.name : '?')[0].toUpperCase())}</div><span class="nm">${esc(nameOf(seat))}</span>${turn ? '<span>⏳</span>' : ''}</div>
-    <div class="meta">${meta}${badges}</div>${stats}${accuse}</div>`;
+  return `<div class="plate ${turn ? 'turn' : ''} ${p && !p.online ? 'offline' : ''}" ${turn ? 'data-turnplate' : ''}>
+    <div class="who"><div class="avatar">${esc((p ? p.name : '?')[0].toUpperCase())}</div><span class="nm">${esc(nameOf(seat))}</span>${turn ? `<span class="tsec" data-tsec>${S.turnDeadline ? Math.max(0, Math.ceil(remainingMs() / 1000)) : '⏳'}</span>` : ''}${S.auto && S.auto[seat] ? '<span class="badge bot" title="Otomatik oynanıyor">🤖</span>' : ''}</div>
+    <div class="meta">${meta}${badges}</div>${stats}${accuse}${turn && S.turnDeadline ? '<div class="tbar"><i data-tbar></i></div>' : ''}</div>`;
 }
 
 function pileHTML(seat) {
@@ -1193,7 +1234,7 @@ function centerHTML() {
     <div class="mid">
       <div class="deck ${canDraw ? 'can' : ''}" data-act="draw" title="Desteden çek"><div class="layer"></div><div class="layer"></div><div class="layer"></div><div class="num">${S.deckCount}</div></div>
       <div class="ind">Gösterge${tileHTML(S.indicator)}</div>
-      <div class="banner ${myTurn() ? 'mine' : ''}">${banner}</div>
+      <div class="banner ${myTurn() ? 'mine' : ''}">${banner}${myTurn() && S.turnDeadline ? ' <span class="bsec" data-tsec></span><span class="bsec2"> sn</span>' : ''}</div>
     </div>
     <div class="tsets">${sets || '<div class="noopen">Henüz açan yok</div>'}</div>`;
 }
@@ -1259,6 +1300,7 @@ function render() {
   $('cifteBtn').classList.toggle('hidden', !!(S.openType[you] || S.cifteGoer[you]) || !S.handActive);
   $('cifteBtn').disabled = !myTurn();
   $('untakeBtn').classList.toggle('hidden', !(myTurn() && S.pendingTake));
+  $('hereBtn').classList.toggle('hidden', !(S.auto && S.auto[you] && S.handActive));
   $('modeSeri').classList.toggle('on', autoMode === 'seri');
   $('modeCift').classList.toggle('on', autoMode === 'cift');
   document.querySelectorAll('[data-act^="steal"]').forEach(b => b.disabled = !myTurn() || S.stealsLeft <= 0);
@@ -1280,7 +1322,7 @@ function rulesHTML() {
     <div class="rhead"><h2>📖 Çalmalı 101 Kuralları</h2><button class="btn sm ghost" data-act="closeModal">Kapat ✕</button></div>
     <nav class="rtabs">
       <a href="#r-temel">Temel</a><a href="#r-acma">Açma</a><a href="#r-yandan">Yandan alma</a><a href="#r-cifte">Çifte gitmek</a>
-      <a href="#r-islek">İşleme</a><a href="#r-puan">Puanlama</a><a href="#r-calma">🕵️ Taş çalma</a><a href="#r-ters">🔄 Ters taş</a><a href="#r-ekran">Ekran</a>
+      <a href="#r-islek">İşleme</a><a href="#r-puan">Puanlama</a><a href="#r-calma">🕵️ Taş çalma</a><a href="#r-ters">🔄 Ters taş</a><a href="#r-sure">⏱ Süre</a><a href="#r-ekran">Ekran</a>
     </nav>
 
     <h3 id="r-temel">🀄 Temel</h3>
@@ -1373,6 +1415,15 @@ function rulesHTML() {
       </li>
       <li>Ters taşın yerine geçen gerçek taşla okeyi almaya çalışan da sahteyi ortaya çıkarır.</li>
       <li>Dürüst masada sadece gerçek okey ters çevrilebilir.</li>
+    </ul>
+
+    <h3 id="r-sure">⏱ Sıra süresi</h3>
+    <ul>
+      <li>Masa kurulurken 15, 30 ya da 45 saniye (veya süresiz) seçilir. Süre, sıranın geldiği andan taşını atana kadar işler.</li>
+      <li>Kalan süre, sırası gelenin plakasında saniye ve alttaki çubukla görünür. Son 5 saniyede kırmızıya döner, telefon titrer.</li>
+      <li><b>Süre dolarsa</b> senin yerine oynanır: çekmediysen desteden çekilir, sonra en zararsız taş atılır (işlek taş ve okey atılmaz).</li>
+      <li>Üst üste <b>${v('AFK_AFTER_TIMEOUTS', 2)} kez</b> süre kaçıran ya da bağlantısı kopan oyuncu <b>🤖 otomatik</b> oynanır, masa kimseyi beklemez. Bir hamle yapınca ya da <b>🙋 Buradayım</b>'a basınca kontrol geri gelir.</li>
+      <li>Bağlantısı kopana yeniden bağlanması için ${Math.round(v('OFFLINE_GRACE_MS', 10000) / 1000)} saniye beklenir. Aynı isimle tekrar girince yerine oturur.</li>
     </ul>
 
     <h3 id="r-ekran">🖐️ Ekran ve kontroller</h3>
